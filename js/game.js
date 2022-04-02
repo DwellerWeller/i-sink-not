@@ -259,7 +259,7 @@ class DebugDisplay extends Entity {
     }
 }
 
-let previousTick = performance.now();
+let previousTick;
 let tickTimer;
 
 function tick() {
@@ -273,8 +273,8 @@ function tick() {
     previousTick = now;
 }
 
-const firstFrame = performance.now();
-let previousFrame = firstFrame;
+let firstFrame;
+let previousFrame;
 
 function render(now) {
     if (!state.gameRunning) 
@@ -294,6 +294,8 @@ export function setUp(canvasEl_) {
     canvasEl = canvasEl_;
     CANVAS_WIDTH = canvasEl.width;
     CANVAS_HEIGHT = canvasEl.height;
+
+    state = new State;
 
     ctx = canvasEl.getContext('2d');
 
@@ -318,10 +320,14 @@ export function setUp(canvasEl_) {
 
     entities.push(new Water());
 
-    state = new State;
-
+    const now = performance.now();
+    previousTick = now;
     tickTimer = setInterval(tick, 100);
-    render(performance.now());
+
+    firstFrame = now;
+    previousFrame = firstFrame;
+    render(firstFrame);
+
     canvasEl.onclick = onClick;
 }
 
