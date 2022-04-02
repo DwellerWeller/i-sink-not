@@ -304,7 +304,7 @@ export function setUp(canvasEl_) {
 
     entities.push(
         new Button(0, '🪣', 1000, () => {state.floodAmount = Math.max(0, state.floodAmount - 1)}),
-        new Button(1, '🧹', 1000, () => () => {state.speed = Math.min(state.speed + 1, 5)}),
+        new Button(1, '🧹', 1000, () => {state.speed = Math.min(state.speed + 1, 5)}),
     );
 
     const ship = new Ship();
