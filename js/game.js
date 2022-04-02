@@ -112,7 +112,7 @@ class GameController extends Entity {
         if (state.shipHeight - 100 < state.shipDraught) {
             state.gameRunning = false;
             tearDown(canvasEl);
-            end.setUp(canvasEl);
+            end.setUp(canvasEl, state.distanceTraveled);
             return;
         }
 
