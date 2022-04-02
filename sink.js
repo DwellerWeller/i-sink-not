@@ -1,5 +1,5 @@
 let waterLevel = 0;
-let floodRate = 0;
+let floodRate = 1;
 let speed = 0;
 let distanceTraveled = 0;
 
@@ -48,7 +48,7 @@ class Player {
 
             if (timeRemaining <= 0) {
                 this.busy = false;
-                this.stateEl.textContent = 'Ready';
+                this.stateEl.textContent = 'ready';
 
                 this.callback();
 
@@ -62,8 +62,43 @@ class Player {
     }
 }
 
+const machinesEl = document.getElementById('machines');
+class Autobaler {
+    constructor() {
+        this.elapsed = 0;
+        this.procTime = 2000;
+
+        this.progressEl = document.createElement('progress');
+        this.progressEl.value = 0;
+        this.progressEl.max = 100;
+
+        const rowEl = document.createElement('tr');
+        const nameEl = document.createElement('td');
+        const stateEl = document.createElement('td');
+        nameEl.textContent = '🤖';
+        stateEl.appendChild(this.progressEl);
+        rowEl.appendChild(nameEl);
+        rowEl.appendChild(stateEl);
+        machinesEl.appendChild(rowEl);
+    }
+
+    tick(elapsed) {
+        this.elapsed += elapsed;
+        this.progressEl.value = Math.round((this.elapsed / this.procTime) * 100);
+
+        if (this.elapsed >= this.procTime) {
+            if (waterLevel > 0) {
+                waterLevel -= 1;
+            }
+            
+            this.elapsed = 0;
+        }
+    }
+}
+
 
 const player = new Player();
+const tickers = [player];
 
 
 const hullTable =  document.getElementById('hull');
@@ -79,7 +114,7 @@ hullTable.addEventListener('click', ev => {
     }
 
     target.value = '🔧';
-    player.act('Repairing', 1000, () => {
+    player.act('repairing', 1000, () => {
         floodRate -= 1;
         target.value = '🪵';
     });
@@ -92,7 +127,7 @@ bucketEl.addEventListener('click', ev => {
     }
 
     bucketEl.value = '🍥';
-    player.act('Baleing', 1000, () => {
+    player.act('baleing', 1000, () => {
         if (waterLevel > 0) {
             waterLevel -= 1;
         }
@@ -103,9 +138,18 @@ bucketEl.addEventListener('click', ev => {
 const oarEl = document.getElementById('oar');
 oarEl.addEventListener('click', ev => {
     oarEl.value = '🍥';
-    player.act('Rowing', 500, () => {
+    player.act('rowing', 500, () => {
         speed += 1;
         oarEl.value = '🧹';
+    });
+});
+
+const buildAutobalerEl = document.getElementById('autobaler');
+buildAutobalerEl.addEventListener('click', ev => {
+    buildAutobalerEl.value = '🍥';
+    player.act('building autobaler', 5000, () => {
+        buildAutobalerEl.remove();
+        tickers.push(new Autobaler());
     });
 });
 
@@ -126,7 +170,9 @@ function tick() {
     waterLevel += floodRate
     distanceTraveled += speed;
     speed = Math.max(0, speed - DRAG);
-    player.tick(TICK_INTERVAL);
+    for (const ticker of tickers) {
+        ticker.tick(TICK_INTERVAL);
+    }
 
     // spring a new leak
     if (Math.random() < 0.01) {  // TODO: accelerate later on?
