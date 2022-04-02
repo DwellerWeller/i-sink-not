@@ -9,8 +9,8 @@ const BUTTON_MARGIN = 20;
 class Entity {
     render(timeSinceLastTick) {}
     tick(now) {}
-    // return true if this entity should be "clicked" at position x, y
-    checkClick(x, y) { return false; }
+    // return *entity reference* if this entity should be "clicked" at position x, y
+    checkClick(x, y) { return null; }
     // callback for when this entity is clicked
     onClick(x, y) {}
 }
@@ -44,6 +44,8 @@ const state = new State;
 
 let currentCallback = null;
 
+const isPointInBox = (x, y, box) => !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
+
 class Button extends Entity {
     static SIZE = 50;
     static MARGIN = 20;
@@ -68,7 +70,9 @@ class Button extends Entity {
 
     checkClick(x, y) {
         const { box } = this;
-        return !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
+        if (isPointInBox(x, y, box)) {
+            return this;
+        }
     }
 
     onClick(x, y) {
@@ -96,7 +100,8 @@ canvasEl.addEventListener('click', function(ev) {
     const y = ev.offsetY;
 
     for (let entity of entities) {
-        if (entity.checkClick(x, y)) {
+        let res = entity.checkClick(x, y);
+        if (res) {
             entity.onClick(x, y);
             break;
         }
@@ -156,13 +161,29 @@ class Ship extends Entity {
 
     modules = [[]];
 
+    constructor() {
+        super();
+        const ship = this;
+        this.box = {
+            // position is anchored to the bottom left corner of the ship
+            x: SHIP_MODULE_WIDTH,
+            get y() { return CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + state.shipDraught },
+            get width() { return ship.columns * SHIP_MODULE_WIDTH },
+            get height() { return ship.modules.length * SHIP_MODULE_HEIGHT },
+        }
+    }
+
     tick(timeSinceLastTick) {
     }
 
     render(now) {
         ctx.save();
 
-        ctx.translate(SHIP_MODULE_WIDTH, CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + state.shipDraught);
+        const { box } = this;
+
+        ctx.translate(box.x, box.y);
+        ctx.strokeStyle = 'red';
+        ctx.strokeRect(0, -box.height, box.width, box.height);
 
         for (let y = 0; y < this.modules.length; y++) {
             const row = this.modules[y];
@@ -176,6 +197,7 @@ class Ship extends Entity {
                     module.render(now);
                 } else {
                     // debug
+                    ctx.strokeStyle = 'white';
                     ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
                 }
                 }
@@ -183,6 +205,33 @@ class Ship extends Entity {
         }
 
         ctx.restore();
+    }
+
+    checkClick(mouseX, mouseY) {
+        const { x, y } = this.box;
+
+        console.log(`checking click at ${mouseX} ${mouseY}`);
+
+        const moduleBox = { x: 0, y: 0, width: SHIP_MODULE_WIDTH, height: SHIP_MODULE_HEIGHT };
+
+        for (let modY = 0; modY < this.modules.length; modY++) {
+            const row = this.modules[modY];
+            for (let modX = 0; modX < row.length; modX++) {
+                const module = row[modX];
+                if (!module) continue;
+
+                moduleBox.x =  x + (modX * SHIP_MODULE_WIDTH);
+                moduleBox.y = y + ((modY + 1) * -SHIP_MODULE_HEIGHT);
+
+                // TODO - i would move the logic for individual modules to the module class, but they don't currently
+                // know their position in the ship or have a reference to the ship, so i'll just do it here
+                // let res = module.checkClick(x, y);
+                if (isPointInBox(mouseX, mouseY, moduleBox)) {
+                    console.log(`clicked on module in position ${modX}, ${modY}`);
+                    return module;
+                }
+            }
+        }
     }
 }
 
