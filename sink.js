@@ -9,6 +9,10 @@ const BUTTON_MARGIN = 20;
 class Entity {
     render(timeSinceLastTick) {}
     tick(now) {}
+    // return true if this entity should be "clicked" at position x, y
+    checkClick(x, y) { return false; }
+    // callback for when this entity is clicked
+    onClick(x, y) {}
 }
 
 const entities = [];
@@ -38,13 +42,48 @@ class State {
 
 const state = new State;
 
-
 let currentCallback = null;
 
-const buttons = [
-    {icon: '🪣', cost: 1000, callback: () => {state.floodAmount = Math.max(0, state.floodAmount - 1)}},
-    {icon: '🧹', cost: 1000, callback: () => {state.speed = Math.min(state.speed + 1, 5)}},
-];
+class Button extends Entity {
+    static SIZE = 50;
+    static MARGIN = 20;
+
+    static currentIndex = 0;
+
+    constructor(icon, cost, callback) {
+        super();
+        this.icon = icon;
+        this.cost = cost;
+        this.callback = callback;
+
+        this.box = {
+            x: Button.MARGIN,
+            y: Button.MARGIN + Button.currentIndex * (Button.SIZE + Button.MARGIN),
+            height: Button.SIZE,
+            width: Button.SIZE,
+        };
+
+        Button.currentIndex += 1;
+    }
+
+    checkClick(x, y) {
+        const { box } = this;
+        return !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
+    }
+
+    onClick(x, y) {
+        state.cooldown = this.cost;
+        currentCallback = this.callback;
+    }
+
+    render() {
+        const { x, y, width, height } = this.box;
+        ctx.fillStyle = state.cooldown > 0 ? 'grey' : 'cornsilk';
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeText(this.icon, x + 10, y + 36);
+    }
+}
+
 /**************/
 
 canvasEl.addEventListener('click', function(ev) {
@@ -54,26 +93,14 @@ canvasEl.addEventListener('click', function(ev) {
     }
 
     const x = ev.offsetX;
-    if (x >= BUTTON_MARGIN && x <= (BUTTON_MARGIN + BUTTON_SIZE)) {
-        const y = ev.offsetY;
+    const y = ev.offsetY;
 
-        let currentY = BUTTON_MARGIN;
-        for (const button of buttons) {
-            if (y < currentY) {
-                break;
-            }
-
-            if (y < currentY + BUTTON_SIZE) {
-                state.cooldown = button.cost;
-                currentCallback = button.callback;
-                return;
-            }
-
-            currentY += BUTTON_SIZE + BUTTON_MARGIN;
+    for (let entity of entities) {
+        if (entity.checkClick(x, y)) {
+            entity.onClick(x, y);
+            break;
         }
     }
-
-    // TODO: clicks on the hull
 });
 
 class GameController extends Entity {
@@ -110,15 +137,6 @@ class GameController extends Entity {
         const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
         ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, Math.floor(textMetrics.actualBoundingBoxAscent) + 10);
-
-        // buttons
-        let currentY = BUTTON_MARGIN;
-        ctx.fillStyle = state.cooldown > 0 ? 'grey' : 'cornsilk';
-        for (const button of buttons) {
-            ctx.fillRect(BUTTON_MARGIN, currentY, BUTTON_SIZE, BUTTON_SIZE);
-            ctx.strokeText(button.icon, BUTTON_MARGIN + 10, currentY + 36);
-            currentY += BUTTON_SIZE + BUTTON_MARGIN;
-        }
     }
 }
 
@@ -223,6 +241,11 @@ function render(now) {
 
 entities.push(new GameController());
 entities.push(new DebugDisplay());
+
+entities.push(
+    new Button('🪣', 1000, () => {state.floodAmount = Math.max(0, state.floodAmount - 1)}),
+    new Button('🧹', 1000, () => () => {state.speed = Math.min(state.speed + 1, 5)}),
+);
 
 const ship = new Ship();
 ship.modules = [
