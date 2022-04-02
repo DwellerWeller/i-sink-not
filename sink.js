@@ -115,10 +115,57 @@ class GameController extends Entity {
             ctx.strokeText(button.icon, BUTTON_MARGIN + 10, currentY + 36);
             currentY += BUTTON_SIZE + BUTTON_MARGIN;
         }
+    }
+}
 
-        // ship
-        ctx.drawImage(shipImage, 100, CANVAS_HEIGHT - shipHeight + shipDraught);
+const SHIP_MODULE_HEIGHT = 100;
+const SHIP_MODULE_WIDTH = 100;
 
+class ShipModule extends Entity {
+    image = shipImage;
+
+    render() {
+        ctx.drawImage(shipImage, 0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
+    }
+}
+
+class Ship extends Entity {
+    columns = 4;
+
+    modules = [[]];
+
+    tick(timeSinceLastTick) {
+    }
+
+    render(now) {
+        ctx.save();
+
+        ctx.translate(SHIP_MODULE_WIDTH, CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + shipDraught);
+
+        for (let y = 0; y < this.modules.length; y++) {
+            const row = this.modules[y];
+
+            for (let x = 0; x < row.length; x++) {
+                ctx.translate(x * SHIP_MODULE_WIDTH, 0);
+                const module = row[x];
+                // debug
+                ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
+                if (module) {
+                    module.render(now);
+                } else {
+                    // debug
+                    ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
+                }
+                }
+            ctx.translate((row.length - 1) * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
+        }
+
+        ctx.restore();
+    }
+}
+
+class Water extends Entity {
+    render(now) {
         // water
         ctx.fillStyle = 'rgba(0, 0, 128, .7)';
         ctx.fillRect(0, CANVAS_HEIGHT - 100 - 5 * Math.sin((now - firstFrame) / 250), CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -151,7 +198,20 @@ function render(now) {
     requestAnimationFrame(render);
 }
 
+/**************/
+
 entities.push(new GameController());
+
+const ship = new Ship();
+ship.modules = [
+    [new ShipModule(), null],
+    [null, new ShipModule()],
+    [new ShipModule(), null],
+];
+
+entities.push(ship);
+
+entities.push(new Water());
 
 tickTimer = setInterval(tick, 100);
 render(performance.now());
