@@ -87,7 +87,7 @@ function tick() {
 
     distanceTraveled += timeSinceLastTick * (speed / 100);
     speed = Math.max(0, speed - .1); // TODO: make this a function of draught
-    floodAmount += timeSinceLastTick * (floodRate / 10);
+    floodAmount += timeSinceLastTick * (floodRate / 100);
     shipDraught = floodAmount + 10; // TODO: smarter
 
     previousTick = now;
