@@ -10,11 +10,22 @@
   <h1>boaty mcboatface</h1>
 
   <h2>state</h2>
+  <table>
+    <tr>
+      <td id="state">ready</td>
+      <td> <progress id="cooldown" max="100" value="0"></progress></td>
+    </tr>
+
+    <tr>
+      <td>distance</td>
+      <td id="distance">0</td>
+    </tr>
+  </table>
   <p id="state">ready</p>
-  <progress id="cooldown" max="100" value="100"></progress>
 
   <h2>actions</h2>
   <input type="button" value="🪣" id="bucket">
+  <input type="button" value="🧹" id="oar">
 
   <h2>boat</h2>
   <table id="hull">

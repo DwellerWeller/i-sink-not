@@ -6,23 +6,71 @@ let distanceTraveled = 0;
 let timeToSpend = 0;
 let timeElapsed = 0;
 
-const cooldownEl = document.getElementById('cooldown');
-const stateEl = document.getElementById('state');
+const DRAG = .1;
+const TICK_INTERVAL = 100;
 
-const floodEl = document.createElement('div');
-floodEl.id = 'flood';
-document.body.appendChild(floodEl);
+
+
+class Player {
+    constructor() {
+        this.busy = false;
+
+        this.timeElapsed = undefined;
+        this.timeRequired = undefined;
+        this.callback = undefined;
+
+        this.stateEl = document.getElementById('state');
+        this.cooldownEl = document.getElementById('cooldown');
+    }
+
+    act(description, costInMilliseconds, callback) {
+        if (this.busy) {
+            return;
+        }
+
+        this.busy = true;
+        this.timeElapsed = 0;
+        this.timeRequired = costInMilliseconds;
+        this.callback = callback;
+
+        this.stateEl.textContent = `${description}...`;
+        for (const inputEl of document.querySelectorAll('input')) {
+            inputEl.disabled = true;
+        }
+    }    
+
+    tick(elapsed) {
+        if (this.busy) {
+            this.timeElapsed += elapsed;
+
+            const timeRemaining = this.timeRequired - this.timeElapsed;
+            this.cooldownEl.value = (1 - (timeRemaining / this.timeRequired)) * 100;
+
+            if (timeRemaining <= 0) {
+                this.busy = false;
+                this.stateEl.textContent = 'Ready';
+
+                this.callback();
+
+                for (const inputEl of document.querySelectorAll('input')) {
+                    inputEl.disabled = false;
+                }
+
+                this.cooldownEl.value = 0;
+            }
+        }
+    }
+}
+
+
+const player = new Player();
+
 
 const hullTable =  document.getElementById('hull');
 const hullEls = hullTable.querySelectorAll('input[type="button"]');
-
 hullTable.addEventListener('click', ev => {
     const target = ev.target;
     if (target.tagName != 'INPUT') {
-        return;
-    }
-
-    if (timeToSpend > 0) {
         return;
     }
 
@@ -30,27 +78,42 @@ hullTable.addEventListener('click', ev => {
         return;
     }
 
-    target.value = '🪵';
-
-    stateEl.textContent = 'repairing';
-    timeToSpend = 1000;
-    timeElapsed = 0;
-    floodRate -= 1;
-    target.classList.add('in-progress');
+    target.value = '🔧';
+    player.act('Repairing', 1000, () => {
+        floodRate -= 1;
+        target.value = '🪵';
+    });
 });
 
 const bucketEl = document.getElementById('bucket');
 bucketEl.addEventListener('click', ev => {
-    if (timeToSpend > 0) {
+    if (waterLevel <= 0) {
         return;
     }
 
-    stateEl.textContent = 'baleing';
-    timeToSpend = 1000;
-    timeElapsed = 0;
-    waterLevel -= 1;
-    bucketEl.classList.add('in-progress');
+    bucketEl.value = '🍥';
+    player.act('Baleing', 1000, () => {
+        if (waterLevel > 0) {
+            waterLevel -= 1;
+        }
+        bucketEl.value = '🪣';
+    });
 });
+
+const oarEl = document.getElementById('oar');
+oarEl.addEventListener('click', ev => {
+    oarEl.value = '🍥';
+    player.act('Rowing', 500, () => {
+        speed += 1;
+        oarEl.value = '🧹';
+    });
+});
+
+const floodEl = document.createElement('div');
+floodEl.id = 'flood';
+document.body.appendChild(floodEl);
+
+const distanceEl = document.getElementById('distance');
 
 function tick() {
     // if we sank we're done
@@ -60,11 +123,10 @@ function tick() {
     }
 
     // update game models
-    waterLevel += floodRate;
-    if (timeToSpend > 0) {
-        timeElapsed += 100;
-
-    }
+    waterLevel += floodRate
+    distanceTraveled += speed;
+    speed = Math.max(0, speed - DRAG);
+    player.tick(TICK_INTERVAL);
 
     // spring a new leak
     if (Math.random() < 0.01) {  // TODO: accelerate later on?
@@ -77,17 +139,8 @@ function tick() {
         }
     }
 
-    if (timeElapsed != 0 && timeElapsed >= timeToSpend) {
-        timeElapsed = 0;
-        timeToSpend = 0;
-        for(const el of document.querySelectorAll('.in-progress')) {
-            el.classList.remove('in-progress');
-        }
-        stateEl.textContent = 'ready';
-    }
-
     // update the ui
     floodEl.style.height = `${waterLevel}%`;
-    
+    distanceEl.textContent = Math.floor(distanceTraveled); 
 }
-const tickTimer = setInterval(tick, 100);
+const tickTimer = setInterval(tick, TICK_INTERVAL);
