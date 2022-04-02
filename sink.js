@@ -25,27 +25,31 @@ function loadImage(url) {
 const shipImage = await loadImage('art/ship-hull.png');
 
 /* game state */
-let floodRate = 1;
-let floodAmount = 0;
 
-let shipDraught = 10;
-let shipHeight = shipImage.height;
+class State {
+    floodRate = 1;
+    floodAmount = 0;
+    shipDraught = 10;
+    shipHeight = shipImage.height;
+    distanceTraveled = 0;
+    speed = 0;
+    cooldown = 0;
+}
 
-let distanceTraveled = 0;
-let speed = 0;
+const state = new State;
 
-let cooldown = 0;
+
 let currentCallback = null;
 
 const buttons = [
-    {icon: '🪣', cost: 1000, callback: () => {floodAmount = Math.max(0, floodAmount - 1)}},
-    {icon: '🧹', cost: 1000, callback: () => {speed = Math.min(speed + 1, 5)}},
+    {icon: '🪣', cost: 1000, callback: () => {state.floodAmount = Math.max(0, state.floodAmount - 1)}},
+    {icon: '🧹', cost: 1000, callback: () => {state.speed = Math.min(state.speed + 1, 5)}},
 ];
 /**************/
 
 canvasEl.addEventListener('click', function(ev) {
     // can't do any buttons while in cooldown
-    if (cooldown > 0) {
+    if (state.cooldown > 0) {
         return;
     }
 
@@ -60,7 +64,7 @@ canvasEl.addEventListener('click', function(ev) {
             }
 
             if (y < currentY + BUTTON_SIZE) {
-                cooldown = button.cost;
+                state.cooldown = button.cost;
                 currentCallback = button.callback;
                 return;
             }
@@ -76,23 +80,23 @@ class GameController extends Entity {
     tick(timeSinceLastTick) {
         // lose condition
         // TODO: don't hard code the water height here
-        if (shipHeight - 100 < shipDraught) {
+        if (state.shipHeight - 100 < state.shipDraught) {
             alert('you sank my battleship');
             clearInterval(tickTimer);
             return;
         }
 
         // handle cooldowns and actions
-        cooldown = Math.max(0, cooldown - timeSinceLastTick);
-        if (cooldown == 0 && currentCallback) {
+        state.cooldown = Math.max(0, state.cooldown - timeSinceLastTick);
+        if (state.cooldown == 0 && currentCallback) {
             currentCallback();
             currentCallback = null;
         }
 
-        distanceTraveled += timeSinceLastTick * (speed / 100);
-        speed = Math.max(0, speed - .1); // TODO: make this a function of draught
-        floodAmount += timeSinceLastTick * (floodRate / 100);
-        shipDraught = floodAmount + 10; // TODO: smarter
+        state.distanceTraveled += timeSinceLastTick * (state.speed / 100);
+        state.speed = Math.max(0, state.speed - .1); // TODO: make this a function of draught
+        state.floodAmount += timeSinceLastTick * (state.floodRate / 100);
+        state.shipDraught = state.floodAmount + 10; // TODO: smarter
     }
 
     render(now) {
@@ -103,13 +107,13 @@ class GameController extends Entity {
         // distance
         ctx.fillStyle = 'white';
         ctx.font = '32px sans-serif';
-        const distanceText = `${Math.floor(distanceTraveled)}m`;
+        const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
         ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, Math.floor(textMetrics.actualBoundingBoxAscent) + 10);
 
         // buttons
         let currentY = BUTTON_MARGIN;
-        ctx.fillStyle = cooldown > 0 ? 'grey' : 'cornsilk';
+        ctx.fillStyle = state.cooldown > 0 ? 'grey' : 'cornsilk';
         for (const button of buttons) {
             ctx.fillRect(BUTTON_MARGIN, currentY, BUTTON_SIZE, BUTTON_SIZE);
             ctx.strokeText(button.icon, BUTTON_MARGIN + 10, currentY + 36);
@@ -125,7 +129,7 @@ class ShipModule extends Entity {
     image = shipImage;
 
     render() {
-        ctx.drawImage(shipImage, 0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
+        ctx.drawImage(this.image, 0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
     }
 }
 
@@ -140,7 +144,7 @@ class Ship extends Entity {
     render(now) {
         ctx.save();
 
-        ctx.translate(SHIP_MODULE_WIDTH, CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + shipDraught);
+        ctx.translate(SHIP_MODULE_WIDTH, CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + state.shipDraught);
 
         for (let y = 0; y < this.modules.length; y++) {
             const row = this.modules[y];
@@ -169,6 +173,23 @@ class Water extends Entity {
         // water
         ctx.fillStyle = 'rgba(0, 0, 128, .7)';
         ctx.fillRect(0, CANVAS_HEIGHT - 100 - 5 * Math.sin((now - firstFrame) / 250), CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+}
+
+class DebugDisplay extends Entity {
+    render() {
+        ctx.fillStyle = 'black';
+        ctx.font = '24px sans-serif';
+
+        let offsetY = 50;
+        for (let key in state) {
+            let val = state[key];
+            if (typeof val === 'number') val = val.toFixed(2);
+            const text = `${key} = ${val}`;
+            const textMetrics = ctx.measureText(text);
+            offsetY += Math.floor(textMetrics.actualBoundingBoxAscent);
+            ctx.fillText(text, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, offsetY);
+        }
     }
 }
 
@@ -201,6 +222,7 @@ function render(now) {
 /**************/
 
 entities.push(new GameController());
+entities.push(new DebugDisplay());
 
 const ship = new Ship();
 ship.modules = [
