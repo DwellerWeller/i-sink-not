@@ -291,6 +291,8 @@ class ConstructionModule extends ShipModule {
 }
 
 class SailModule extends ShipModule {
+    spriteSheet = shipSpriteSheet;
+
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
 
@@ -311,8 +313,9 @@ class SailModule extends ShipModule {
     }
 
     render() {
-        ctx.fillStyle = 'orange'; // TODO: art me!
-        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        if (this.spriteSheet.sprites.sail) {
+            this.spriteSheet.sprites.sail.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
     }
 }
 

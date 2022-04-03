@@ -59,7 +59,7 @@ export const shipSpriteSheet = new SpriteSheet(shipSpriteSheetImg);
 shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
 shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199);
-shipSpriteSheet.createSprite('sail', 279, 37, 145, 225);
+shipSpriteSheet.createSprite('sail', 279, 37, 145, 225, 8, 98);
 
 window.shipSpriteSheet = shipSpriteSheet;
 
