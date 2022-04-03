@@ -153,6 +153,12 @@ class Button extends Entity {
 
 /**************/
 
+function isEntityInteractive(entity) {
+    if (state.paused && !entity.canClickWhilePaused) return false;
+    if (!entity.updating) return false;
+    return true;
+}
+
 function onClick(ev) {
     // can't do any buttons while in cooldown
     if (state.cooldown > 0) {
@@ -163,18 +169,14 @@ function onClick(ev) {
     const y = ev.offsetY;
 
     for (let entity of entities) {
-        if (state.paused && !entity.canClickWhilePaused) continue;
-        if (!entity.updating) continue;
-        
-        let res = entity.checkClick(x, y);
-        if (res) {
-            res.onClick(x, y);
-            return;
+        if (isEntityInteractive(entity)) {
+            let res = entity.checkClick(x, y);
+            if (res) {
+                res.onClick(x, y);
+                return;
+            }
         }
     }
-
-    // console.log('creating a particle');
-    // entities.push(new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, x, y));
 }
 
 function onMouseMove(ev) {
@@ -187,7 +189,7 @@ function onMouseMove(ev) {
     
     let newHoveredEntity = null;
     for (let entity of entities) {
-        if (!state.paused || entity.canClickWhilePaused) {
+        if (isEntityInteractive(entity)) {
             let res = entity.checkClick(x, y);
             if (res) {
                 newHoveredEntity = res;
