@@ -759,6 +759,35 @@ function render(now) {
     requestAnimationFrame(render);
 }
 
+class TitleScreen extends Entity {
+    checkClick(x, y) { return this; }
+
+    onClick(x, y) {
+        this.alive = false;
+        state.paused = false;
+
+        entities.push(new DebugDisplay());
+        entities.push(
+            new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
+            new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
+            new Button(2, '🐛', 1, () => {
+                state.debug = !state.debug;
+            }),
+        );
+    }
+
+    render() {
+        ctx.save();
+        ctx.fillStyle = 'black';
+    	ctx.fillText('click anywhere to start (again)', 100, 100);
+	    ctx.font = "48pt arial";
+	    ctx.textAlign = "center";
+	    ctx.fillText('i sink not', 1024 / 2, 768 / 2);
+	    ctx.textAlign = "start";
+        ctx.restore();
+    }
+}
+
 /**************/
 
 export function setUp(canvasEl_) {
@@ -770,20 +799,14 @@ export function setUp(canvasEl_) {
 
     state = new State(ship);
 
+    state.paused = true;
+
     ctx = canvasEl.getContext('2d');
 
     entities.length = 0;
 
     entities.push(new GameController());
-    entities.push(new DebugDisplay());
-
-    entities.push(
-        new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
-        new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
-        new Button(2, '🐛', 1, () => {
-            state.debug = !state.debug;
-        }),
-    );
+    entities.push(new TitleScreen());
 
     document.addEventListener('keydown', ev => {
         if (state.debug) {
@@ -822,4 +845,12 @@ function tearDown(canvasEl) {
 window._debug = {
     get state() { return state },
     entities,
+}
+
+export function pause() {
+    state.paused = true;
+}
+
+export function play() {
+    state.paused = false;
 }

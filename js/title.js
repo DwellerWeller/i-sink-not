@@ -40,13 +40,9 @@ function onClick(canvasEl) {
 	if (!showing_title_screen && !game_started) {
 		theme_song.play();
 	    const ctx = canvasEl.getContext('2d');
-	    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-    	ctx.fillText('click anywhere to start (again)', 100, 100);
-	    ctx.font = "48pt arial";
-	    ctx.textAlign = "center";
-	    ctx.fillText('i sink not', 1024 / 2, 768 / 2);
-	    ctx.textAlign = "start";
+	    
 		showing_title_screen = true;
+		game.setUp(canvasEl);
 	}
 
 	// Start game
@@ -71,8 +67,8 @@ function onClick(canvasEl) {
 	    // Start the game
 	    showing_title_screen = false;
 	    game_started = true;
-	    tearDown(canvasEl);
-	    game.setUp(canvasEl);
+		tearDown(canvasEl);
+	    game.play();
 	}
 
 }
