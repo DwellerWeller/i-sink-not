@@ -177,6 +177,23 @@ const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
     static canBuildAt(x, y) { return true; }
+
+    constructor(ship, x, y) {
+        super();
+        this.ship = ship;
+        // x and y here are coordinates in the ship's grid, not relative to canvas!
+        this.x = x;
+        this.y = y;
+    }
+
+    get submerged() {
+        return (this.y+1) * SHIP_MODULE_HEIGHT < state.shipDraught;
+    }
+
+    get wet() {
+        return this.y * SHIP_MODULE_HEIGHT < state.shipDraught;
+    }
+
     updateDisplay() {}
 }
 
@@ -185,12 +202,8 @@ class HullModule extends ShipModule {
     renderTopHull = false;
 
     constructor(ship, x, y) {
-        super();
+        super(ship, x, y);
         this.state = 'normal';
-        this.ship = ship;
-        // x and y here are coordinates in the ship's grid, not relative to canvas!
-        this.x = x;
-        this.y = y;
         this.updateDisplay();
     }
 
@@ -205,9 +218,14 @@ class HullModule extends ShipModule {
     }
 
     tick(timeSinceLastTick) {
+        if (this.submerged)
+            return;
+
+        if (!this.wet)
+            return;
+
         if (this.state == 'normal') {
             if (Math.random() < 0.01) {
-                console.log('sprang a leak!');
                 this.state = 'leaking';
                 state.floodRate += 1;
             }
