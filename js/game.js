@@ -438,7 +438,9 @@ class Ship extends Entity {
 
                     if (module) {
                         console.log(`clicked on module in position ${modX}, ${modY}`);
-                        return module;
+                        if (!module.submerged) {
+                            return module;
+                        }
                     } else {
                         // can only build when adjacent to something else
                         if ((modX > 0 && row && row[modX-1]) || // someone to our left
