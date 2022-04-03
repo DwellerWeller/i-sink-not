@@ -163,12 +163,13 @@ function onClick(ev) {
     const y = ev.offsetY;
 
     for (let entity of entities) {
-        if (!state.paused || entity.canClickWhilePaused) {
-            let res = entity.checkClick(x, y);
-            if (res) {
-                res.onClick(x, y);
-                return;
-            }
+        if (state.paused && !entity.canClickWhilePaused) continue;
+        if (!entity.updating) continue;
+        
+        let res = entity.checkClick(x, y);
+        if (res) {
+            res.onClick(x, y);
+            return;
         }
     }
 
