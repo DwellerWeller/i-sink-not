@@ -694,6 +694,32 @@ class PropellerModule extends ShipModule {
     }
 }
 
+class BalloonModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.fin_sail;
+
+    solid = false;
+
+    get isInflated() {
+        const moduleBelow = this.ship.getModule(this.x, this.y - 1);
+        return moduleBelow.isGeneratingSteam;
+    }
+
+    get weight() {
+        return this.isInflated ? -10 : 1;
+    }
+
+    static canBuildAt(modX, modY) {
+        const moduleBelow = state.ship.getModule(modX, modY - 1);
+        return moduleBelow && moduleBelow.constructor.name == 'BoilerModule';
+    }
+
+    render() {
+        // TODO
+        ctx.fillStyle = this.isInflated ? '#00ff00' : '#ff0000';
+        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+    }
+}
+
 class FinSailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.fin_sail;
     solid = false;
@@ -712,7 +738,7 @@ class FinSailModule extends ShipModule {
     }
 }
 
-const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule];
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule];
 
 
 class Ship extends Entity {
