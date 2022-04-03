@@ -1187,7 +1187,7 @@ class TitleScreen extends Entity {
         
         yPosition += textMetrics.actualBoundingBoxAscent + 15;
         ctx.font = `italic 24pt ${fontStack}`;
-        text = '"Delay the inevitable"';
+        text = '“Delay the inevitable”';
         ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
 
         yPosition += (textMetrics.actualBoundingBoxAscent + 15) * 2;
