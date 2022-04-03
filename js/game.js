@@ -939,11 +939,11 @@ class TitleScreen extends Entity {
         if (this.fadeStart) return;
 
         this.fadeStart = performance.now();
-        this.fadeUntil = this.fadeStart + 750;
+        this.fadeUntil = this.fadeStart + 500;
     }
 
-    tick() {
-        if (!this.fadeStart) return;
+    tick(deltaT, now) {
+        if (!this.fadeStart || now < this.fadeUntil) return;
 
         this.alive = false;
 
