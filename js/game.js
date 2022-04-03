@@ -41,6 +41,7 @@ class Entity {
     visible = true;
     updating = true;
     alive = true;
+    zIndex = 0;
 
     render(timeSinceLastTick) {}
     tick(now) {}
@@ -745,6 +746,8 @@ function render(now) {
     if (!state.gameRunning) 
         return;
 
+    entities.sort((a, b) => a.zIndex - b.zIndex);
+
     for (let entity of entities) {
         if (entity.visible) entity.render(now);
     }
@@ -793,7 +796,9 @@ export function setUp(canvasEl_) {
 
     entities.push(ship);
 
-    entities.push(new Water(WATER_HEIGHT, .75, .15));
+    const foregroundWater = new Water(WATER_HEIGHT, .9, .15);
+    foregroundWater.zIndex = 100;
+    entities.push(foregroundWater);
 
     const now = performance.now();
     previousTick = now;
