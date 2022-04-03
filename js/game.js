@@ -512,7 +512,7 @@ class NullModule extends ShipModule {
     }
 
     render() {
-        if (this.buildOptions.length > 0) {
+        if (state.cooldown == 0 && this.buildOptions.length > 0) {
             ctx.fillStyle = 'rgba(255, 255, 0, .5)';
             ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
