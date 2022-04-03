@@ -118,11 +118,11 @@ function onClick(ev) {
 
 function drawParallax(img, speed, y_offset) {
     var numImages = Math.ceil(CANVAS_WIDTH / img.width) + 1;
-    var xpos = performance.now() * speed * -1 % img.width;
+    var xpos = performance.now() * speed * 1 % img.width;
     ctx.save();
     ctx.translate(-xpos, 0);
     for (var i = 0; i < numImages; i++) {
-     ctx.drawImage(img, i * img.width * -1, y_offset);
+     ctx.drawImage(img, i * img.width * 1, y_offset);
     }
     ctx.restore();
 }
