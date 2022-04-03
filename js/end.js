@@ -5,6 +5,7 @@ export function setUp(canvasEl, distanceTraveled, timeElapsed) {
 
     const ctx = canvasEl.getContext('2d');
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    ctx.fillStyle = 'black';
     ctx.fillText(`blub blub. you made it ${Math.floor(distanceTraveled)} meters and stayed afloat ${Math.floor(timeElapsed / 1000)} seconds`, 100, 100);
     ctx.fillText('click anywhere to try again', 100, 200);
 }
