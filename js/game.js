@@ -271,6 +271,7 @@ class GameController extends Entity {
         state.cooldown = Math.max(0, state.cooldown - timeSinceLastTick);
         if (state.cooldown == 0 && state.currentCallback) {
             state.currentCallback();
+            state.triggerSyntheticMouseMove();
             state.currentCallback = null;
         }
 
@@ -435,6 +436,18 @@ class HullModule extends ShipModule {
         }
     }
 
+    onMouseOver() {
+        if (this.state != 'normal') {
+            canvasEl.style.cursor = 'pointer';
+        } else if (this.floodAmount > 0) {
+            canvasEl.style.cursor = 'pointer';
+        }
+    }
+
+    onMouseOut() {
+        canvasEl.style.cursor = 'default';
+    }
+
     onClick(x, y) {
         if (this.state == 'leaking') {
             sound.repairing.play();
@@ -444,6 +457,11 @@ class HullModule extends ShipModule {
             state.currentCallback = () => {
                 this.state = 'normal';
             };
+        } else if (this.floodAmount > 0) {
+            state.cooldown = 1000;
+            state.currentCallback = () => {
+                this.floodAmount = Math.max(0, this.floodAmount-10);
+            }
         }
     }
 
@@ -466,6 +484,10 @@ class HullModule extends ShipModule {
         if (this.state == 'repairing') {
             ctx.fillStyle = 'rgba(255, 255, 0, .2)';
             ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        } else if (this.floodAmount > 0) {
+            ctx.fillStyle = 'rgba(0, 0, 255, 1)';
+            const percentFlooded = this.floodAmount / this.buoyancy;
+            ctx.fillRect(0, Math.ceil(-SHIP_MODULE_HEIGHT * percentFlooded), SHIP_MODULE_WIDTH, Math.ceil(SHIP_MODULE_HEIGHT * percentFlooded));
         }
     }
 
@@ -522,7 +544,6 @@ class NullModule extends ShipModule {
                 this.ship.addModule(this.x, this.y, ConstructionModule);
                 state.currentCallback = () => {
                     this.ship.addModule(this.x, this.y, ev.target.moduleType);
-                    state.triggerSyntheticMouseMove();
                 };
             } else if (ev.target.id != 'cancel') {
                 return;
@@ -1139,19 +1160,7 @@ class TitleScreen extends Entity {
 
         entities.push(new DebugDisplay());
         entities.push(
-            new Button(0, '🪣', 1000, () => { sound.bucket.play() }, () => {
-                for (const row of state.ship.modules) {
-                    for (const module of row) {
-                        if (module && module.constructor.name == 'HullModule') {
-                            if (module.percentSubmerged < 1) {
-                                module.floodAmount = Math.max(0, module.floodAmount-1);
-                            }
-                        }
-                    }
-                }
-            }),
-            new Button(1, '🧹', 1000, () => {state.speedBoost = 1; sound.row.play()}, () => {state.speedBoost = 0}),
-            new Button(2, '🐛', 1, () => {
+            new Button(0, '🐛', 1, () => {
                 state.debug = !state.debug;
             }),
         );
