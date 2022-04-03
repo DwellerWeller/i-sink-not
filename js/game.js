@@ -550,6 +550,14 @@ export function setUp(canvasEl_) {
         new Button(1, '🧹', 1000, () => {state.speed = Math.min(state.speed + 1, 5)}),
     );
 
+    if (state.debug) {
+        document.addEventListener('keydown', ev => {
+            if (ev.code == 'Space') {
+                state.paused = !state.paused;
+            }
+        });
+    }
+
     ship.addModule(1, 0, HullModule);
 
     entities.push(ship);
