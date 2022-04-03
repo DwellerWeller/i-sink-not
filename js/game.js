@@ -546,7 +546,7 @@ class Ship extends Entity {
         const ship = this;
         this.box = {
             // position is anchored to the bottom left corner of the ship
-            x: SHIP_MODULE_WIDTH,
+            x: SHIP_MODULE_WIDTH*2,
             get y() { return CANVAS_HEIGHT - currentWaterHeight + state.shipDraught },
             get width() { return ship.columns * SHIP_MODULE_WIDTH },
             get height() { return ship.modules.length * SHIP_MODULE_HEIGHT },
