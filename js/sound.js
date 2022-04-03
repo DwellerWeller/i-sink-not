@@ -1,0 +1,1 @@
+export var building  = new Audio('sound/building.mp3');

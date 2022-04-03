@@ -1,4 +1,5 @@
 import * as end from './end.js';
+import * as sound from './sound.js';
 
 import { shipSpriteSheet } from './art.js';
 
@@ -417,6 +418,7 @@ class ModuleBuilder extends Entity {
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
+                sound.building.play();
                 state.cooldown = 1000;
                 this.ship.addModule(this.modX, this.modY, ConstructionModule);
                 state.currentCallback = () => {
