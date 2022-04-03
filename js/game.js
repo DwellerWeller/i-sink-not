@@ -891,9 +891,9 @@ class TitleScreen extends Entity {
 
     render() {
         ctx.save();
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = '#242738';
         ctx.fillText('click anywhere to start', 100, 100);
-	    ctx.font = "48pt arial";
+        ctx.font = "48pt 'BIZ UDPMincho', serif";
 	    ctx.textAlign = "center";
 	    ctx.fillText('i sink not', 1024 / 2, 768 / 2);
 	    ctx.textAlign = "start";
