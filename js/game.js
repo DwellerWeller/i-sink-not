@@ -367,12 +367,17 @@ class Water extends Entity {
 }
 
 class DebugDisplay extends Entity {
+    constructor() {
+        super();
+        this.stateKeys = Object.keys(state);
+        this.stateKeys.push('shipHeight');
+    }
     render() {
         ctx.fillStyle = 'black';
         ctx.font = '24px sans-serif';
 
         let offsetY = 50;
-        for (let key in state) {
+        for (let key of this.stateKeys) {
             let val = state[key];
             if (typeof val === 'number') val = val.toFixed(2);
             if (typeof val === 'function') val = '<callback>';
