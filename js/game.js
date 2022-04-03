@@ -245,14 +245,18 @@ class ShipModule extends Entity {
     updateDisplay() {}
 
     render() {
-        if (this.sprite) {
-            this.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        const sprite = this.sprite || this.constructor.sprite;
+        if (sprite) {
+            sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
 }
 
 class HullModule extends ShipModule {
-    sprite = shipSpriteSheet.sprites.hull;
+    static sprite = shipSpriteSheet.sprites.hull;
+
+    sprite = HullModule.sprite;
+
     defaultSprite = shipSpriteSheet.sprites.hull;
     bustedSprite = shipSpriteSheet.sprites.busted_hull;
     topHullSprite = shipSpriteSheet.sprites.top_hull;
@@ -351,12 +355,12 @@ class HullModule extends ShipModule {
 }
 
 class ConstructionModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.scaffolding;
     solid = false;
-    sprite = shipSpriteSheet.sprites.scaffolding;
 }
 
 class SailModule extends ShipModule {
-    sprite = shipSpriteSheet.sprites.sail;
+    static sprite = shipSpriteSheet.sprites.sail;
 
     solid = false;
 
@@ -381,7 +385,7 @@ class SailModule extends ShipModule {
 }
 
 class BoilerModule extends ShipModule {
-    sprite = shipSpriteSheet.sprites.boiler;
+    static sprite = shipSpriteSheet.sprites.boiler;
 
     weight = 10;
 
@@ -392,7 +396,7 @@ class BoilerModule extends ShipModule {
 }
 
 class PropellerModule extends ShipModule {
-    sprite = shipSpriteSheet.sprites.propeller;
+    static sprite = shipSpriteSheet.sprites.propeller;
     solid = false;
 
     static canBuildAt(modX, modY) {
@@ -402,7 +406,7 @@ class PropellerModule extends ShipModule {
 }
 
 class FinSailModule extends ShipModule {
-    sprite = shipSpriteSheet.sprites.fin_sail;
+    static sprite = shipSpriteSheet.sprites.fin_sail;
     solid = false;
 
     static canBuildAt(modX, modY) {
