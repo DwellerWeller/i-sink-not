@@ -1185,7 +1185,13 @@ class TitleScreen extends Entity {
         text = 'Dan Ellis, Matt Lee, and Neil Williams';
         ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
         
-        yPosition += (textMetrics.actualBoundingBoxAscent + 15) * 3;
+        yPosition += textMetrics.actualBoundingBoxAscent + 15;
+        ctx.font = `italic 24pt ${fontStack}`;
+        text = '"Delay the inevitable"';
+        ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
+
+        yPosition += (textMetrics.actualBoundingBoxAscent + 15) * 2;
+        ctx.font = `24pt ${fontStack}`;
         ctx.fillText('Click anywhere to start', CANVAS_WIDTH / 2, yPosition);
 
         ctx.restore();
