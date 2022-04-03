@@ -306,6 +306,7 @@ class HullModule extends ShipModule {
 
     onClick(x, y) {
         if (this.state == 'leaking') {
+            sound.repairing.play();
             this.state = 'repairing';
 
             state.cooldown = 1000;
