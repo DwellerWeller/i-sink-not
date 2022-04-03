@@ -499,7 +499,7 @@ let tickTimer;
 
 function tick() {
     const now = performance.now();
-    const timeSinceLastTick = now - previousTick;
+    const timeSinceLastTick = Math.min(now - previousTick, 1000);
 
     if (!state.paused) {
         for (let entity of entities) {
