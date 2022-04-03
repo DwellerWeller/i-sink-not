@@ -201,7 +201,7 @@ class HullModule extends ShipModule {
         }
 
         const moduleBelow = state.ship.modules[modY-1][modX];
-        return moduleBelow.constructor.name == 'HullModule';
+        return moduleBelow && moduleBelow.constructor.name == 'HullModule';
     }
 
     tick(timeSinceLastTick) {
@@ -274,7 +274,7 @@ class SailModule extends ShipModule {
 
         // must be on top of a hull
         const moduleBelow = state.ship.modules[modY-1][modX];
-        return moduleBelow.constructor.name == 'HullModule';
+        return moduleBelow && moduleBelow.constructor.name == 'HullModule';
     }
 
     render() {
@@ -312,14 +312,22 @@ class ModuleBuilder extends Entity {
             menuEl.remove();
             state.paused = false;
         };
+
+        let buildingAllowed = false;
         for (const moduleType of moduleTypes) {
             if (moduleType.canBuildAt(this.modX, this.modY)) {
                 const moduleEl = document.createElement('button');
                 moduleEl.moduleType = moduleType;
                 moduleEl.textContent = moduleType.name;
                 menuEl.appendChild(moduleEl);
+                buildingAllowed = true;
             }
         }
+
+        if (!buildingAllowed) {
+            return;
+        }
+
         const cancelEl = document.createElement('button');
         cancelEl.id = 'cancel';
         cancelEl.textContent = '🚫';
