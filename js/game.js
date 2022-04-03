@@ -580,6 +580,12 @@ class BoilerModule extends ShipModule {
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
+
+    tick() {
+        if (this.percentSubmerged < .5 && Math.random() < .5) {
+            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+        }
+    }
 }
 
 class PropellerModule extends ShipModule {
@@ -879,6 +885,18 @@ class SteamParticle extends Particle {
     direction = normalizeVector({
         x: (Math.random() * 2) - 1,
         y: (Math.random() * 2) - 1,
+    });
+
+    tick(deltaT, t) {
+        super.tick(deltaT, t);
+        this.x -= state.speed;
+    }
+}
+
+class BoilerSteamParticle extends SteamParticle {
+    direction = normalizeVector({
+        x: (Math.random() * 2) - 1,
+        y: -1,
     });
 }
 
