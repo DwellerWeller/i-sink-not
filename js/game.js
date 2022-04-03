@@ -602,8 +602,17 @@ class Ship extends Entity {
 }
 
 class Water extends Entity {
+    constructor(height, alpha, parallaxSpeed) {
+        super();
+        this.height = height;
+        this.alpha = alpha;
+        this.parallaxSpeed = parallaxSpeed;
+    }
+
     render(now) {
-        drawParallax(window.wavesImg, .15, CANVAS_HEIGHT - WATER_HEIGHT - 75 + getWaterBob());
+        ctx.globalAlpha = this.alpha;
+        drawParallax(window.wavesImg, this.parallaxSpeed, CANVAS_HEIGHT - this.height - 75 + getWaterBob());
+        ctx.globalAlpha = 1;
     }
 }
 
@@ -750,9 +759,11 @@ export function setUp(canvasEl_) {
 
     ship.addModule(1, 0, HullModule);
 
+    entities.push(new Water(WATER_HEIGHT + 10, 1, .1));
+
     entities.push(ship);
 
-    entities.push(new Water());
+    entities.push(new Water(WATER_HEIGHT, .75, .15));
 
     const now = performance.now();
     previousTick = now;
