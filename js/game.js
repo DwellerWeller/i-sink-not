@@ -11,9 +11,33 @@ const BUTTON_MARGIN = 20;
 
 const WATER_HEIGHT = 100;
 
+const vectorLength = vec => Math.sqrt((vec.x ** 2) + (vec.y ** 2));
+
+const normalizeVector = vec => {
+    const l = vectorLength(vec);
+    vec.x /= l;
+    vec.y /= l;
+    return vec;
+}
+
+const addVectors = (vecA, vecB) => {
+    vecA.x += vecB.x;
+    vecA.y += vecB.y;
+    return vecA;
+}
+
+const scaleVector = (vec, scalar) => {
+    vec.x *= scalar;
+    vec.y *= scalar;
+    return vec;
+}
+
+const VECTOR_UP = { x: 0, y: -1 };
+
 class Entity {
     visible = true;
     updating = true;
+    alive = true;
 
     render(timeSinceLastTick) {}
     tick(now) {}
@@ -121,9 +145,12 @@ function onClick(ev) {
         let res = entity.checkClick(x, y);
         if (res) {
             res.onClick(x, y);
-            break;
+            return;
         }
     }
+
+    // console.log('creating a particle');
+    // entities.push(new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, x, y));
 }
 
 function drawParallax(img, speed, y_offset) {
@@ -520,6 +547,13 @@ class Ship extends Entity {
         this.updateModule(x + 1, y);
         this.updateModule(x, y - 1);
         this.updateModule(x, y + 1);
+
+        const spriteX = this.box.x + (x * SHIP_MODULE_WIDTH);
+        const spriteY = this.box.y + (y * -SHIP_MODULE_HEIGHT);
+
+        entities.push(
+            new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, spriteX, spriteY),
+        );
     }
 
     updateModule(x, y) {
@@ -568,6 +602,50 @@ class DebugDisplay extends Entity {
     }
 }
 
+class Particle extends Entity {
+    speed = 5;
+    
+    constructor(liveUntil, sprite, x, y) {
+        super();
+        this.created = performance.now();
+        this.liveUntil = liveUntil;
+        this.sprite = sprite;
+        this.x = x;
+        this.y = y;
+        this.direction = normalizeVector({
+            x: (Math.random() * 2) - 1,
+            y: (Math.random() * 2) - 1,
+        });
+    }
+
+    tick(deltaT, t) {
+        if (t > this.liveUntil) {
+            this.alive = false;
+            return;
+        }
+
+        const move = scaleVector(this.direction, this.speed);
+        addVectors(this, move);
+
+        this.direction = normalizeVector(
+            addVectors(
+                this.direction,
+                VECTOR_UP,
+            ),
+        );
+    }
+
+    render(t) {
+        if (!this.alive || t > this.liveUntil) return;
+
+        const currentT = t - this.created;
+        const targetT = this.liveUntil - this.created;
+        ctx.globalAlpha = 1 - (currentT / targetT);
+        this.sprite.draw(ctx, this.x, this.y);
+        ctx.globalAlpha = 1;
+    }
+}
+
 let previousTick;
 let tickTimer;
 
@@ -576,10 +654,16 @@ function tick() {
     const timeSinceLastTick = Math.min(now - previousTick, 1000);
 
     if (!state.paused) {
-        for (let entity of entities) {
-            if (entity.updating) entity.tick(timeSinceLastTick);
+        let livingEntities = 0;
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i];
+            if (!entity.alive) continue;
+            if (entity.updating) entity.tick(timeSinceLastTick, now);
+            entities[livingEntities] = entity;
+            livingEntities++;
         }
-
+        
+        entities.length = livingEntities;
         state.timeElapsed += timeSinceLastTick;
     }
 

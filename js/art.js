@@ -61,7 +61,7 @@ shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
 shipSpriteSheet.createSprite('side_hull', 318, 872, 84, 74, -130, -46);
 shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199);
 shipSpriteSheet.createSprite('sail', 279, 37, 145, 225, 8, 98);
-shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71);
+shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71, 32, 35);
 shipSpriteSheet.createSprite('boiler', 48, 321, 161, 262);
 shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215);
 
