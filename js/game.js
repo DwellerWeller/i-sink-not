@@ -303,7 +303,7 @@ class HullModule extends ShipModule {
         }
 
         if (this.state == 'normal') {
-            if (Math.random() < 0.01) {
+            if (Math.random() < 0.005) {
                 sound.breaking.play();
                 this.state = 'leaking';
             }
