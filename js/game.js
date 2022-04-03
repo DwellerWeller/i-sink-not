@@ -333,11 +333,7 @@ class HullModule extends ShipModule {
 
 class ConstructionModule extends ShipModule {
     solid = false;
-
-    render() {
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-    }
+    sprite = shipSpriteSheet.sprites.scaffolding;
 }
 
 class SailModule extends ShipModule {
