@@ -10,6 +10,9 @@ const BUTTON_MARGIN = 20;
 const WATER_HEIGHT = 100;
 
 class Entity {
+    visible = true;
+    updating = true;
+
     render(timeSinceLastTick) {}
     tick(now) {}
     // return *entity reference* if this entity should be "clicked" at position x, y
@@ -295,7 +298,7 @@ function tick() {
 
     if (!state.paused) {
         for (let entity of entities) {
-            entity.tick(timeSinceLastTick);
+            if (entity.updating) entity.tick(timeSinceLastTick);
         }
     }
 
@@ -310,7 +313,7 @@ function render(now) {
         return;
 
     for (let entity of entities) {
-        entity.render(now);
+        if (entity.visible) entity.render(now);
     }
 
     previousFrame = now;
