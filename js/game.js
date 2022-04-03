@@ -218,6 +218,8 @@ const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
+    solid = true;
+
     static canBuildAt(x, y) { return true; }
 
     constructor(ship, x, y) {
@@ -259,8 +261,8 @@ class HullModule extends ShipModule {
             return true;
         }
 
-        const moduleBelow = state.ship.modules[modY-1][modX];
-        return moduleBelow && moduleBelow.constructor.name == 'HullModule';
+        const moduleBelow = state.ship.getModule(modX, modY - 1);
+        return moduleBelow && moduleBelow.solid;
     }
 
     tick(timeSinceLastTick) {
@@ -318,12 +320,15 @@ class HullModule extends ShipModule {
     }
 
     updateDisplay() {
-        this.renderTopHull = !!this.ship.getModule(this.x, this.y + 1, HullModule);
+        const moduleAbove = this.ship.getModule(this.x, this.y + 1);
+        this.renderTopHull = moduleAbove && moduleAbove.solid;
         this.renderRightHull = !!this.ship.getModule(this.x + 1, this.y, HullModule);
     }
 }
 
 class ConstructionModule extends ShipModule {
+    solid = false;
+
     render() {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
@@ -333,6 +338,8 @@ class ConstructionModule extends ShipModule {
 class SailModule extends ShipModule {
     sailSprite = shipSpriteSheet.sprites.sail;
 
+    solid = false;
+
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
 
@@ -341,9 +348,9 @@ class SailModule extends ShipModule {
             return false;
         }
 
-        // must be on top of a hull
-        const moduleBelow = state.ship.modules[modY-1][modX];
-        return moduleBelow && moduleBelow.constructor.name == 'HullModule';
+        // must be on top of a solid module
+        const moduleBelow = state.ship.getModule(modX, modY-1);
+        return moduleBelow && moduleBelow.solid;
     }
 
     getStats() {
