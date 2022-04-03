@@ -70,6 +70,19 @@ shipSpriteSheet.createSprite('boiler', 48, 321, 161, 262, 14, 128);
 shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215, 0, 70);
 shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76);
 shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86);
+shipSpriteSheet.createSprite('oar_icon', 505, 632, 75, 79);
+shipSpriteSheet.createSprite('wind_1', 630, 315, 139, 30);
+shipSpriteSheet.createSprite('wind_2', 633, 361, 134, 33);
+shipSpriteSheet.createSprite('wind_3', 641, 401, 123, 30);
+shipSpriteSheet.createSprite('wind_4', 643, 438, 122, 37);
+shipSpriteSheet.createSprite('propeller_blur_1', 609, 58, 61, 202);
+shipSpriteSheet.createSprite('propeller_blur_2', 689, 60, 61, 202);
+shipSpriteSheet.createSprite('bit_screw', 640, 528, 12, 12);
+shipSpriteSheet.createSprite('bit_plate', 665, 525, 13, 16);
+shipSpriteSheet.createSprite('bit_brick', 688, 523, 18, 15);
+shipSpriteSheet.createSprite('bit_wood', 650, 545, 18, 12);
+shipSpriteSheet.createSprite('bit_coin', 683, 544, 13, 13);
+
 
 window.shipSpriteSheet = shipSpriteSheet;
 
