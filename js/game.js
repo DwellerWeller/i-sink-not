@@ -44,6 +44,7 @@ class Entity {
     updating = true;
     alive = true;
     zIndex = 0;
+    canClickWhilePaused = false;
 
     render(timeSinceLastTick) {}
     tick(now) {}
@@ -146,10 +147,12 @@ function onClick(ev) {
     const y = ev.offsetY;
 
     for (let entity of entities) {
-        let res = entity.checkClick(x, y);
-        if (res) {
-            res.onClick(x, y);
-            return;
+        if (!state.paused || entity.canClickWhilePaused) {
+            let res = entity.checkClick(x, y);
+            if (res) {
+                res.onClick(x, y);
+                return;
+            }
         }
     }
 
@@ -550,9 +553,6 @@ class Ship extends Entity {
 
         const { box } = this;
 
-        ctx.strokeStyle = 'red';
-        ctx.strokeRect(0, -box.height, box.width, box.height);
-
         let y = this.rows;
         while (y-->0) {
             const row = this.modules[y];
@@ -823,6 +823,7 @@ function bezier(t)
 
 class TitleScreen extends Entity {
     zIndex = 1000;
+    canClickWhilePaused = true;
 
     checkClick(x, y) { return this; }
 
@@ -870,7 +871,7 @@ class TitleScreen extends Entity {
     render() {
         ctx.save();
         ctx.fillStyle = 'black';
-    	ctx.fillText('click anywhere to start (again)', 100, 100);
+        ctx.fillText('click anywhere to start', 100, 100);
 	    ctx.font = "48pt arial";
 	    ctx.textAlign = "center";
 	    ctx.fillText('i sink not', 1024 / 2, 768 / 2);
@@ -881,6 +882,7 @@ class TitleScreen extends Entity {
 
 class GameOverScreen extends Entity {
     zIndex = 1000;
+    canClickWhilePaused = true;
 
     constructor(distanceTraveled, timeElapsed) {
         super();
