@@ -58,11 +58,11 @@ const shipSpriteSheet = new SpriteSheet(loadImage('art/ship-spritesheet.png'));
 shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
 shipSpriteSheet.createSprite('side_hull', 318, 872, 84, 74, -130, -46);
-shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199);
+shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199, -60, 66);
 shipSpriteSheet.createSprite('sail', 279, 37, 145, 225, 8, 98);
 shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71, 32, 35);
 shipSpriteSheet.createSprite('boiler', 48, 321, 161, 262, 14, 128);
-shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215);
+shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215, 0, 70);
 
 window.shipSpriteSheet = shipSpriteSheet;
 

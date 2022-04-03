@@ -372,15 +372,29 @@ class BoilerModule extends ShipModule {
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
+}
 
-    render() {
-        if (this.sprite) {
-            this.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
-        }
+class PropellerModule extends ShipModule {
+    sprite = shipSpriteSheet.sprites.propeller;
+    solid = false;
+
+    static canBuildAt(modX, modY) {
+        const moduleRight = state.ship.getModule(modX + 1, modY);
+        return moduleRight && moduleRight.solid;
     }
 }
 
-const moduleTypes = [HullModule, SailModule, BoilerModule];
+class FinSailModule extends ShipModule {
+    sprite = shipSpriteSheet.sprites.fin_sail;
+    solid = false;
+
+    static canBuildAt(modX, modY) {
+        const moduleLeft = state.ship.getModule(modX - 1, modY);
+        return moduleLeft && moduleLeft.solid;
+    }
+}
+
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule];
 
 class ModuleBuilder extends Entity {
     constructor(ship, modX, modY) {
