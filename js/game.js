@@ -304,7 +304,7 @@ class HullModule extends ShipModule {
                 this.state = 'leaking';
             }
         } else {
-            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 1);
+            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 2);
         }
     }
 
