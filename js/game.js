@@ -322,8 +322,6 @@ class ShipModule extends Entity {
     solid = true;
     sprite = null;
 
-    weight = 5;
-
     static canBuildAt(x, y) { return true; }
 
     constructor(ship, x, y) {
@@ -332,6 +330,10 @@ class ShipModule extends Entity {
         // x and y here are coordinates in the ship's grid, not relative to canvas!
         this.x = x;
         this.y = y;
+    }
+
+    get weight() {
+        return 5;
     }
 
     get percentSubmerged() {
@@ -475,12 +477,15 @@ class HullModule extends ShipModule {
 }
 
 class NullModule extends ShipModule {
-    weight = 0;
     solid = false;
 
     constructor(ship, x, y) {
         super(ship, x, y);
         this.buildOptions = [];
+    }
+
+    get weight() {
+        return 0;
     }
 
     onMouseOver() {
@@ -589,7 +594,10 @@ class SailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.sail;
 
     solid = false;
-    weight = 1.5;
+
+    get weight() {
+        return 1.5;
+    }
 
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
@@ -614,11 +622,13 @@ class SailModule extends ShipModule {
 class BoilerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.boiler;
 
-    weight = 10;
-
     constructor(ship, x, y) {
         super(ship, x, y);
         this.state = 'normal';
+    }
+
+    get weight() {
+        return 10;
     }
 
     static canBuildAt(modX, modY) {
@@ -704,7 +714,9 @@ class PropellerModule extends ShipModule {
 
     solid = false;
 
-    weight = 2;
+    get weight() {
+        return 2;
+    }
 
     static canBuildAt(modX, modY) {
         const moduleRight = state.ship.getModule(modX + 1, modY);
@@ -760,7 +772,9 @@ class FinSailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.fin_sail;
     solid = false;
 
-    weight = 2.5;
+    get weight() {
+        return 2.5;
+    }
 
     static canBuildAt(modX, modY) {
         const moduleLeft = state.ship.getModule(modX - 1, modY);
