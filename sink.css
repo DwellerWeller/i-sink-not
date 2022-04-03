@@ -14,3 +14,20 @@ body {
 #game {
     border: 3px solid black;
 }
+
+#module-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid black;
+    background: rgba(128, 128, 128, .5);
+    padding: 5em;
+}
+
+#module-menu button {
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    margin: 1em;
+}

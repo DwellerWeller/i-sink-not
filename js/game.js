@@ -37,6 +37,7 @@ class State {
     speed = 0;
     cooldown = 0;
     currentCallback = null;
+    timeElapsed = 0;
     
     constructor(ship) {
         this.ship = ship;
@@ -89,19 +90,6 @@ class Button extends Entity {
     }
 }
 
-class ModuleBuilder extends Entity {
-    constructor(ship, modX, modY) {
-        super();
-        this.ship = ship;
-        this.modX = modX;
-        this.modY = modY;
-    }
-
-    onClick(x, y) {
-        this.ship.modules[this.modY][this.modX] = new ShipModule();
-    }
-}
-
 /**************/
 
 function onClick(ev) {
@@ -131,7 +119,7 @@ class GameController extends Entity {
             tearDown(canvasEl);
 
             const timeElapsed = performance.now() - firstFrame;
-            end.setUp(canvasEl, state.distanceTraveled, timeElapsed);
+            end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
             return;
         }
 
@@ -173,6 +161,47 @@ class ShipModule extends Entity {
         if (sprite) {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
+    }
+}
+
+const moduleTypes = [ShipModule];
+
+class ModuleBuilder extends Entity {
+    constructor(ship, modX, modY) {
+        super();
+        this.ship = ship;
+        this.modX = modX;
+        this.modY = modY;
+    }
+
+    onClick(x, y) {
+        state.paused = true;
+
+        const menuEl = document.createElement('div');
+        menuEl.id = 'module-menu';
+        menuEl.onclick = (ev) => {
+            if (ev.target.moduleType) {
+                this.ship.modules[this.modY][this.modX] = new ev.target.moduleType();
+                state.cooldown = 1000;
+            } else if (ev.target.id != 'cancel') {
+                return;
+            }
+
+            menuEl.remove();
+            state.paused = false;
+        };
+        for (const moduleType of moduleTypes) {
+            const moduleEl = document.createElement('button');
+            moduleEl.moduleType = moduleType;
+            moduleEl.textContent = moduleType.name;
+            menuEl.appendChild(moduleEl);
+        }
+        const cancelEl = document.createElement('button');
+        cancelEl.id = 'cancel';
+        cancelEl.textContent = '🚫';
+        menuEl.appendChild(cancelEl);
+
+        document.body.appendChild(menuEl);
     }
 }
 
@@ -301,6 +330,8 @@ function tick() {
         for (let entity of entities) {
             if (entity.updating) entity.tick(timeSinceLastTick);
         }
+
+        state.timeElapsed += timeSinceLastTick;
     }
 
     previousTick = now;
