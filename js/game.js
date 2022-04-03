@@ -182,6 +182,7 @@ class GameController extends Entity {
             state.gameRunning = false;
             // tearDown(canvasEl);
             // end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
+            sound.gameover.play();
             entities.push(new GameOverScreen(state.distanceTraveled, state.timeElapsed));
         }
 
@@ -897,7 +898,6 @@ class GameOverScreen extends Entity {
     checkClick(x, y) { return this; }
 
     render() {
-        sound.gameover.play();
         ctx.fillStyle = 'black';
         ctx.fillText(`blub blub. you made it ${Math.floor(this.distanceTraveled)} meters and stayed afloat ${Math.floor(this.timeElapsed / 1000)} seconds`, 100, 100);
         ctx.fillText('click anywhere to try again', 100, 200);
