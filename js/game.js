@@ -621,13 +621,13 @@ export function setUp(canvasEl_) {
         }),
     );
 
-    if (state.debug) {
-        document.addEventListener('keydown', ev => {
+    document.addEventListener('keydown', ev => {
+        if (state.debug) {
             if (ev.code == 'Space') {
                 state.paused = !state.paused;
             }
-        });
-    }
+        }
+    });
 
     ship.addModule(1, 0, HullModule);
 
