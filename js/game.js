@@ -28,6 +28,7 @@ const entities = [];
 /* game state */
 
 class State {
+    debug = true;
     gameRunning = true;
     paused = false;
     floodRate = 0;
@@ -334,10 +335,10 @@ class Ship extends Entity {
                 
                 const module = row ? row[x] : null;
                 // debug
-                ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
+                state.debug && ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
                 if (module) {
                     module.render(now);
-                } else {
+                } else if (state.debug) {
                     // debug
                     ctx.strokeStyle = 'white';
                     ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
@@ -423,6 +424,7 @@ class DebugDisplay extends Entity {
         this.stateKeys.push('shipHeight');
     }
     render() {
+        if (!state.debug) return;
         ctx.fillStyle = 'black';
         ctx.font = '24px sans-serif';
 
