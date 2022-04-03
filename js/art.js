@@ -42,8 +42,9 @@ class Sprite {
 class SpriteSheet {
     sprites = {};
 
-    constructor(imgLoader) {
-        imgLoader.then(img => this.img = img);
+    constructor(src) {
+        this.src = src;
+        loadImage(src).then(img => this.img = img);
     }
 
     createSprite(name, x, y, width, height, anchorX = 0, anchorY = 0) {
@@ -53,7 +54,7 @@ class SpriteSheet {
     }
 }
 
-const shipSpriteSheet = new SpriteSheet(loadImage('art/ship-spritesheet.png'));
+const shipSpriteSheet = new SpriteSheet('art/ship-spritesheet.png');
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
 shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
