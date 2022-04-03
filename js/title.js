@@ -9,11 +9,6 @@ theme_song.addEventListener('timeupdate', function(){
     }
 });
 
-var play_theme_button = document.getElementById('play_theme');
-play_theme_button.onclick = function () {
-	theme_song.play();
-};
-
 var main_song = new Audio('sound/i sink not - song 2.mp3');
 main_song.addEventListener('timeupdate', function(){
     var buffer = .44;
