@@ -176,6 +176,7 @@ const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
+    static canBuildAt(x, y) { return true; }
     updateDisplay() {}
 }
 
@@ -191,6 +192,16 @@ class HullModule extends ShipModule {
         this.x = x;
         this.y = y;
         this.updateDisplay();
+    }
+
+    static canBuildAt(modX, modY) {
+        // we can only be built on top of other hull modules (or at the bottom)
+        if (modY == 0) {
+            return true;
+        }
+
+        const moduleBelow = state.ship.modules[modY-1][modX];
+        return moduleBelow.constructor.name == 'HullModule';
     }
 
     tick(timeSinceLastTick) {
@@ -245,14 +256,34 @@ class HullModule extends ShipModule {
     }
 }
 
-class ConstructionModule extends Entity {
+class ConstructionModule extends ShipModule {
     render() {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
     }
 }
 
-const moduleTypes = [HullModule];
+class SailModule extends ShipModule {
+    static canBuildAt(modX, modY) {
+        // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
+
+        // cannot build at the root
+        if (modY == 0) {
+            return false;
+        }
+
+        // must be on top of a hull
+        const moduleBelow = state.ship.modules[modY-1][modX];
+        return moduleBelow.constructor.name == 'HullModule';
+    }
+
+    render() {
+        ctx.fillStyle = 'orange'; // TODO: art me!
+        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+    }
+}
+
+const moduleTypes = [HullModule, SailModule];
 
 class ModuleBuilder extends Entity {
     constructor(ship, modX, modY) {
@@ -282,10 +313,12 @@ class ModuleBuilder extends Entity {
             state.paused = false;
         };
         for (const moduleType of moduleTypes) {
-            const moduleEl = document.createElement('button');
-            moduleEl.moduleType = moduleType;
-            moduleEl.textContent = moduleType.name;
-            menuEl.appendChild(moduleEl);
+            if (moduleType.canBuildAt(this.modX, this.modY)) {
+                const moduleEl = document.createElement('button');
+                moduleEl.moduleType = moduleType;
+                moduleEl.textContent = moduleType.name;
+                menuEl.appendChild(moduleEl);
+            }
         }
         const cancelEl = document.createElement('button');
         cancelEl.id = 'cancel';
