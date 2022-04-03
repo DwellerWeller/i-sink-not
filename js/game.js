@@ -28,7 +28,7 @@ const entities = [];
 /* game state */
 
 class State {
-    debug = true;
+    debug = false;
     gameRunning = true;
     paused = false;
     floodRate = 0;
@@ -298,6 +298,8 @@ class ConstructionModule extends ShipModule {
 }
 
 class SailModule extends ShipModule {
+    spriteSheet = shipSpriteSheet;
+
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
 
@@ -318,8 +320,9 @@ class SailModule extends ShipModule {
     }
 
     render() {
-        ctx.fillStyle = 'orange'; // TODO: art me!
-        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        if (this.spriteSheet.sprites.sail) {
+            this.spriteSheet.sprites.sail.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
     }
 }
 
@@ -613,6 +616,9 @@ export function setUp(canvasEl_) {
     entities.push(
         new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
         new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
+        new Button(2, '🐛', 1, () => {
+            state.debug = !state.debug;
+        }),
     );
 
     if (state.debug) {
