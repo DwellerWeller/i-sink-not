@@ -433,6 +433,7 @@ class ModuleBuilder extends Entity {
     }
 
     onClick(x, y) {
+        sound.confirm.play();
         const menuEl = document.createElement('div');
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
@@ -445,6 +446,8 @@ class ModuleBuilder extends Entity {
                 };
             } else if (ev.target.id != 'cancel') {
                 return;
+            } else if (ev.target.id == 'cancel') {
+                sound.cancel.play();
             }
 
             menuEl.remove();
