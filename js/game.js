@@ -342,6 +342,14 @@ class ShipModule extends Entity {
 
     updateDisplay() {}
 
+    tick() {
+        if (this.percentSubmerged > 0 && Math.random() < (state.speed / 10)) {
+            const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
+            const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
+            emitParticle(SprayParticle, 600, spriteX, spriteY);
+        }
+    }
+
     render() {
         const sprite = this.sprite || this.constructor.sprite;
         if (sprite) {
@@ -396,11 +404,7 @@ class HullModule extends ShipModule {
         if (!this.percentSubmerged > 0)
             return;
 
-        if (Math.random() < .5) {
-            const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
-            const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
-            emitParticle(SprayParticle, 600, spriteX, spriteY);
-        }
+        super.tick(timeSinceLastTick, now);
 
         if (this.state == 'normal') {
             if (Math.random() < 0.005) {
@@ -561,6 +565,8 @@ class NullModule extends ShipModule {
             ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
         }
     }
+
+    tick() {}
 }
 
 class ConstructionModule extends ShipModule {
@@ -618,6 +624,8 @@ class BoilerModule extends ShipModule {
         if (this.percentSubmerged >= 1) {
             return;
         }
+
+        super.tick(timeSinceLastTick, now);
             
         if (this.state == 'normal') {
             if (this.isGeneratingSteam && Math.random() < .5) {
@@ -875,9 +883,6 @@ class Ship extends Entity {
         this.updateModule(x, y - 1);
         this.updateModule(x, y + 1);
 
-        const spriteX = this.box.x + (x * SHIP_MODULE_WIDTH);
-        const spriteY = this.box.y + (y * -SHIP_MODULE_HEIGHT);
-
         emitParticle(SteamParticle, 1000, this.globalX, this.globalY);
     }
 
@@ -941,7 +946,6 @@ class DebugDisplay extends Entity {
 }
 
 function emitParticle(ParticleClass, life, x, y) {
-    console.log('emitting particle at ', x, y);
     entities.push(
         new ParticleClass(performance.now() + life, x, y),
     );
