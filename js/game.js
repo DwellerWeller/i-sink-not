@@ -215,6 +215,7 @@ class ShipModule extends Entity {
 class HullModule extends ShipModule {
     spriteSheet = shipSpriteSheet;
     renderTopHull = false;
+    renderRightHull = false;
 
     constructor(ship, x, y) {
         super(ship, x, y);
@@ -273,6 +274,13 @@ class HullModule extends ShipModule {
             }
         }
 
+        if (this.renderRightHull) {
+            const sprite = this.spriteSheet.sprites.side_hull;
+            if (sprite) {
+                sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            }
+        }
+
         if (this.state == 'leaking') {
             ctx.fillStyle = 'rgba(0, 0, 255, .2)';
             ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
@@ -283,10 +291,8 @@ class HullModule extends ShipModule {
     }
 
     updateDisplay() {
-        const hullAbove = this.ship.getModule(this.x, this.y + 1, HullModule);
-        if (hullAbove) {
-            this.renderTopHull = true;
-        }
+        this.renderTopHull = !!this.ship.getModule(this.x, this.y + 1, HullModule);
+        this.renderRightHull = !!this.ship.getModule(this.x + 1, this.y, HullModule);
     }
 }
 
