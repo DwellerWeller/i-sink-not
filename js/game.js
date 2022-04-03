@@ -219,6 +219,7 @@ const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
     solid = true;
+    sprite = null;
 
     static canBuildAt(x, y) { return true; }
 
@@ -239,10 +240,16 @@ class ShipModule extends Entity {
     }
 
     updateDisplay() {}
+
+    render() {
+        if (this.sprite) {
+            this.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
+    }
 }
 
 class HullModule extends ShipModule {
-    defaultSprite = shipSpriteSheet.sprites.hull;
+    sprite = shipSpriteSheet.sprites.hull;
     topHullSprite = shipSpriteSheet.sprites.top_hull;
     sideHullSprite = shipSpriteSheet.sprites.side_hull;
 
@@ -294,9 +301,7 @@ class HullModule extends ShipModule {
     }
 
     render() {
-        if (this.defaultSprite) {
-            this.defaultSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
-        }
+        super.render();
 
         if (this.renderTopHull) {
             if (this.topHullSprite) {
@@ -336,7 +341,7 @@ class ConstructionModule extends ShipModule {
 }
 
 class SailModule extends ShipModule {
-    sailSprite = shipSpriteSheet.sprites.sail;
+    sprite = shipSpriteSheet.sprites.sail;
 
     solid = false;
 
@@ -356,12 +361,6 @@ class SailModule extends ShipModule {
     getStats() {
         return {
             speed: 1,
-        }
-    }
-
-    render() {
-        if (this.sailSprite) {
-            this.sailSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
 }
