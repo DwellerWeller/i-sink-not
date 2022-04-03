@@ -7,6 +7,8 @@ export function setUp(canvasEl) {
 
     const ctx = canvasEl.getContext('2d');
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
 
     const fontSize = 120;
     ctx.fillStyle = '#ccc';

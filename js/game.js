@@ -68,6 +68,7 @@ class State {
     gameRunning = true;
     paused = false;
     shipDraught = 10;
+    timeAfloat = 0;
     distanceTraveled = 0;
 
     // A higher-resolution version of distanceTraveled.  It won't match exactly though,
@@ -87,7 +88,21 @@ class State {
     }
 
     get shipHeight() {
-        return this.ship.box.height;
+        let height = 0;
+        for (const row of this.ship.modules) {
+            let nonNullModuleSeen = false;
+            for (const module of row) {
+                if (module.constructor.name != 'NullModule') {
+                    nonNullModuleSeen = true;
+                    break;
+                }
+            }
+
+            if (nonNullModuleSeen) {
+                height += SHIP_MODULE_HEIGHT;
+            }
+        }
+        return height;
     }
 }
 
@@ -252,6 +267,7 @@ class GameController extends Entity {
         const stats = state.ship.getStats();
         state.speed = stats.speed || 0;
 
+        state.timeAfloat += timeSinceLastTick;
         state.distanceTraveled += timeSinceLastTick/100 * (state.speed + state.speedBoost);
         state.shipDraught += timeSinceLastTick/100 * (stats.weight - (stats.buoyancy || 0));
     }
@@ -268,12 +284,24 @@ class GameController extends Entity {
 
         // TODO move into separate entity
         if (!state.ship.updating) return;
+        if (!state.gameRunning) return;
+
         // distance
         ctx.fillStyle = 'white';
         ctx.font = '32px sans-serif';
+
+        const textMargin = 10;
+
         const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
-        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, Math.floor(textMetrics.actualBoundingBoxAscent) + 10);
+        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - textMargin, Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin);
+
+        // time
+        const secondsAfloat = Math.floor(state.timeAfloat / 1000);
+        const timeText = `${secondsAfloat}s`;
+        const timeTextMetrics = ctx.measureText(timeText);
+        ctx.fillText(timeText, Math.floor(CANVAS_WIDTH - timeTextMetrics.width) - textMargin, (Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin) * 2);
+
     }
 }
 
@@ -571,6 +599,11 @@ class BoilerModule extends ShipModule {
 
     weight = 10;
 
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.state = 'normal';
+    }
+
     static canBuildAt(modX, modY) {
         if (modX == 0) {
             // don't allow building at the back where there's no room for a propellor
@@ -580,10 +613,62 @@ class BoilerModule extends ShipModule {
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
+        
+    tick(timeSinceLastTick, now) {
+        if (this.percentSubmerged >= 1) {
+            return;
+        }
+            
+        if (this.state == 'normal') {
+            if (this.isGeneratingSteam && Math.random() < .5) {
+                emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+            }
 
-    tick() {
-        if (this.percentSubmerged < .5 && Math.random() < .5) {
-            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+            if (Math.random() < 0.005) {
+                sound.breaking.play();
+                this.state = 'exploded';
+            }
+        }
+    }
+
+    get isGeneratingSteam() {
+        if (this.percentSubmerged > .5)
+            return false;
+
+        return this.state == 'normal';
+    }
+
+    onMouseOver() {
+        if (this.state == 'exploded') {
+            canvasEl.style.cursor = 'grab';
+        }
+    }
+
+    onMouseOut() {
+        canvasEl.style.cursor = 'default';
+    }
+
+    onClick(x, y) {
+        if (this.state == 'exploded') {
+            sound.repairing.play();
+            this.state = 'repairing';
+
+            state.cooldown = 1000;
+            state.currentCallback = () => {
+                this.state = 'normal';
+            };
+        }
+    }
+
+    render() {
+        super.render();
+
+        if (this.state == 'exploded') {
+            ctx.fillStyle = 'rgba(255, 0, 0, .2)';
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        } else if (this.state == 'repairing') {
+            ctx.fillStyle = 'rgba(255, 255, 0, .2)';
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
     }
 }
@@ -609,7 +694,7 @@ class PropellerModule extends ShipModule {
 
     getStats() {
         return {
-            speed: this.percentSubmerged < .5 ? 5 : 0,
+            speed: state.ship.getModule(this.x + 1, this.y).isGeneratingSteam ? 5 : 0,
         }
     }
 
@@ -618,6 +703,32 @@ class PropellerModule extends ShipModule {
         if (this.percentSubmerged < .5) {
             this.blurSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
+    }
+}
+
+class BalloonModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.fin_sail;
+
+    solid = false;
+
+    get isInflated() {
+        const moduleBelow = this.ship.getModule(this.x, this.y - 1);
+        return moduleBelow.isGeneratingSteam;
+    }
+
+    get weight() {
+        return this.isInflated ? -10 : 1;
+    }
+
+    static canBuildAt(modX, modY) {
+        const moduleBelow = state.ship.getModule(modX, modY - 1);
+        return moduleBelow && moduleBelow.constructor.name == 'BoilerModule';
+    }
+
+    render() {
+        // TODO
+        ctx.fillStyle = this.isInflated ? '#00ff00' : '#ff0000';
+        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
     }
 }
 
@@ -639,7 +750,7 @@ class FinSailModule extends ShipModule {
     }
 }
 
-const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule];
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule];
 
 
 class Ship extends Entity {
@@ -816,7 +927,7 @@ class DebugDisplay extends Entity {
         ctx.fillStyle = 'black';
         ctx.font = '24px sans-serif';
 
-        let offsetY = 50;
+        let offsetY = 75;
         for (let key of this.stateKeys) {
             let val = state[key];
             if (typeof val === 'number') val = val.toFixed(2);
