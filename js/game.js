@@ -230,10 +230,10 @@ class HullModule extends ShipModule {
 
         if (this.state == 'leaking') {
             ctx.fillStyle = 'rgba(0, 0, 255, .2)';
-            ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         } else if (this.state == 'repairing') {
             ctx.fillStyle = 'rgba(255, 255, 0, .2)';
-            ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
     }
 
@@ -242,6 +242,13 @@ class HullModule extends ShipModule {
         if (hullAbove) {
             this.renderTopHull = true;
         }
+    }
+}
+
+class ConstructionModule extends Entity {
+    render() {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
     }
 }
 
@@ -262,8 +269,11 @@ class ModuleBuilder extends Entity {
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
-                this.ship.addModule(this.modX, this.modY, ev.target.moduleType);
                 state.cooldown = 1000;
+                this.ship.addModule(this.modX, this.modY, ConstructionModule);
+                state.currentCallback = () => {
+                    this.ship.addModule(this.modX, this.modY, ev.target.moduleType);
+                };
             } else if (ev.target.id != 'cancel') {
                 return;
             }
