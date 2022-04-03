@@ -363,7 +363,7 @@ class SailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.sail;
 
     solid = false;
-    weight = 2.5;
+    weight = 1.5;
 
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
@@ -400,7 +400,7 @@ class PropellerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.propeller;
     solid = false;
 
-    weight = 1;
+    weight = 2;
 
     static canBuildAt(modX, modY) {
         const moduleRight = state.ship.getModule(modX + 1, modY);
@@ -423,6 +423,12 @@ class FinSailModule extends ShipModule {
     static canBuildAt(modX, modY) {
         const moduleLeft = state.ship.getModule(modX - 1, modY);
         return moduleLeft && moduleLeft.solid;
+    }
+
+    getStats() {
+        return {
+            speed: this.percentSubmerged < .5 ? .5 : 0,
+        }
     }
 }
 
