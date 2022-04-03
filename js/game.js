@@ -32,7 +32,10 @@ const scaleVector = (vec, scalar) => {
     return vec;
 }
 
+const cloneVector = ({ x, y }) => ({ x, y });
+
 const VECTOR_UP = { x: 0, y: -1 };
+const VECTOR_DOWN = { x: 0, y: 1 };
 
 class Entity {
     visible = true;
@@ -274,9 +277,17 @@ class HullModule extends ShipModule {
         return moduleBelow && moduleBelow.solid;
     }
 
-    tick(timeSinceLastTick) {
+    tick(timeSinceLastTick, now) {
         if (!this.wet)
             return;
+
+        if (Math.random() < .5) {
+            const spriteX = this.ship.box.x + (this.x * SHIP_MODULE_WIDTH) + (Math.random() * SHIP_MODULE_WIDTH);
+            const spriteY = CANVAS_HEIGHT - WATER_HEIGHT + getWaterBob();
+            entities.push(
+                new SprayParticle(now + 600, spriteX, spriteY),
+            );
+        }
 
         if (this.state == 'normal') {
             if (Math.random() < 0.01) {
@@ -461,7 +472,7 @@ class Ship extends Entity {
         }
     }
 
-    tick(timeSinceLastTick) {
+    tick(timeSinceLastTick, now) {
         for (const [modY, row] of this.modules.entries()) {
             // underwater modules don't tick
             if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught) {
@@ -470,7 +481,7 @@ class Ship extends Entity {
 
             for (const module of row) {
                 if (module) {
-                    module.tick(timeSinceLastTick);
+                    module.tick(timeSinceLastTick, now);
                 }
             }
         }
@@ -583,7 +594,7 @@ class Ship extends Entity {
         const spriteY = this.box.y + (y * -SHIP_MODULE_HEIGHT);
 
         entities.push(
-            new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, spriteX, spriteY),
+            new SteamParticle(performance.now() + 1000, spriteX, spriteY),
         );
     }
 
@@ -642,18 +653,16 @@ class DebugDisplay extends Entity {
 
 class Particle extends Entity {
     speed = 5;
+    forceVector = VECTOR_UP;
+    direction = cloneVector(VECTOR_UP);
+    sprite = null;
     
-    constructor(liveUntil, sprite, x, y) {
+    constructor(liveUntil, x, y) {
         super();
         this.created = performance.now();
         this.liveUntil = liveUntil;
-        this.sprite = sprite;
         this.x = x;
         this.y = y;
-        this.direction = normalizeVector({
-            x: (Math.random() * 2) - 1,
-            y: (Math.random() * 2) - 1,
-        });
     }
 
     tick(deltaT, t) {
@@ -668,12 +677,13 @@ class Particle extends Entity {
         this.direction = normalizeVector(
             addVectors(
                 this.direction,
-                VECTOR_UP,
+                this.forceVector,
             ),
         );
     }
 
     render(t) {
+        if (!this.sprite) return;
         if (!this.alive || t > this.liveUntil) return;
 
         const currentT = t - this.created;
@@ -682,6 +692,26 @@ class Particle extends Entity {
         this.sprite.draw(ctx, this.x, this.y);
         ctx.globalAlpha = 1;
     }
+}
+
+class SteamParticle extends Particle {
+    sprite = shipSpriteSheet.sprites.steam_puff;
+
+    direction = normalizeVector({
+        x: (Math.random() * 2) - 1,
+        y: (Math.random() * 2) - 1,
+    });
+}
+
+class SprayParticle extends Particle {
+    sprite = shipSpriteSheet.sprites.water_spray;
+    forceVector = VECTOR_DOWN;
+    speed = 10;
+
+    direction = normalizeVector({
+        x: -Math.random(),
+        y: -1,
+    });
 }
 
 let previousTick;
