@@ -1,7 +1,7 @@
 import * as end from './end.js';
 import * as sound from './sound.js';
 
-import { shipSpriteSheet } from './art.js';
+import { shipSpriteSheet, AnimatedSpriteController } from './art.js';
 
 let canvasEl;
 let ctx;
@@ -403,6 +403,14 @@ class BoilerModule extends ShipModule {
 
 class PropellerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.propeller;
+
+    static blurSprites = [
+        shipSpriteSheet.sprites.propeller_blur_1,
+        shipSpriteSheet.sprites.propeller_blur_2,
+    ];
+
+    blurSprite = new AnimatedSpriteController(PropellerModule.blurSprites, performance.now());
+
     solid = false;
 
     weight = 2;
@@ -415,6 +423,13 @@ class PropellerModule extends ShipModule {
     getStats() {
         return {
             speed: this.percentSubmerged < .5 ? 5 : 0,
+        }
+    }
+
+    render() {
+        super.render();
+        if (this.percentSubmerged < .5) {
+            this.blurSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
 }

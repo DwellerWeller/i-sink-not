@@ -54,6 +54,22 @@ class SpriteSheet {
     }
 }
 
+export class AnimatedSpriteController {
+    constructor(sprites, createdAt, playbackSpeed = 125) {
+        this.sprites = sprites;
+        this.createdAt = createdAt;
+        this.playbackSpeed = playbackSpeed;
+    }
+    
+    draw(ctx, x, y, width, height) {
+        const totalTime = performance.now() - this.createdAt;
+        const frames = this.sprites.length;
+        const frameNumber = Math.floor(totalTime/ this.playbackSpeed);
+        const i = frameNumber % frames;
+        this.sprites[i].draw(ctx, x, y, width, height);
+    }
+}
+
 const shipSpriteSheet = new SpriteSheet('art/ship-spritesheet.png');
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
@@ -75,8 +91,8 @@ shipSpriteSheet.createSprite('wind_1', 630, 315, 139, 30);
 shipSpriteSheet.createSprite('wind_2', 633, 361, 134, 33);
 shipSpriteSheet.createSprite('wind_3', 641, 401, 123, 30);
 shipSpriteSheet.createSprite('wind_4', 643, 438, 122, 37);
-shipSpriteSheet.createSprite('propeller_blur_1', 609, 58, 61, 202);
-shipSpriteSheet.createSprite('propeller_blur_2', 689, 60, 61, 202);
+shipSpriteSheet.createSprite('propeller_blur_1', 609, 58, 61, 202, -50, 68);
+shipSpriteSheet.createSprite('propeller_blur_2', 689, 60, 61, 202, -50, 68);
 shipSpriteSheet.createSprite('bit_screw', 640, 528, 12, 12);
 shipSpriteSheet.createSprite('bit_plate', 665, 525, 13, 16);
 shipSpriteSheet.createSprite('bit_brick', 688, 523, 18, 15);
