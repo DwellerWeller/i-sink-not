@@ -28,7 +28,7 @@ const entities = [];
 /* game state */
 
 class State {
-    debug = true;
+    debug = false;
     gameRunning = true;
     paused = false;
     floodRate = 0;
@@ -609,6 +609,9 @@ export function setUp(canvasEl_) {
     entities.push(
         new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
         new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
+        new Button(2, '🐛', 1, () => {
+            state.debug = !state.debug;
+        }),
     );
 
     if (state.debug) {
