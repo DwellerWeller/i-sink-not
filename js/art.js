@@ -61,3 +61,15 @@ shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199);
 shipSpriteSheet.createSprite('sail', 279, 37, 145, 225);
 
 window.shipSpriteSheet = shipSpriteSheet;
+
+const parallaxBgRed = await loadImage('art/parallax bg red.png');
+
+window.parallaxBgRed = parallaxBgRed;
+
+const parallaxBgOrange = await loadImage('art/parallax bg orange.png');
+
+window.parallaxBgOrange = parallaxBgOrange;
+
+const parallaxBgYellow = await loadImage('art/parallax bg yellow.png');
+
+window.parallaxBgYellow = parallaxBgYellow;

@@ -110,6 +110,17 @@ function onClick(ev) {
     }
 }
 
+function drawParallax(img, speed, y_offset) {
+    var numImages = Math.ceil(CANVAS_WIDTH / img.width) + 1;
+    var xpos = performance.now() * speed * -1 % img.width;
+    ctx.save();
+    ctx.translate(-xpos, 0);
+    for (var i = 0; i < numImages; i++) {
+     ctx.drawImage(img, i * img.width * -1, y_offset);
+    }
+    ctx.restore();
+}
+
 class GameController extends Entity {
     tick(timeSinceLastTick) {
         // lose condition
@@ -140,6 +151,11 @@ class GameController extends Entity {
         // world
         ctx.fillStyle = 'skyblue';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // bg parallax
+        drawParallax(window.parallaxBgYellow, .01, -200);
+        drawParallax(window.parallaxBgOrange, .05, -400);
+        drawParallax(window.parallaxBgRed, .1, -800);
 
         // distance
         ctx.fillStyle = 'white';
