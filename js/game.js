@@ -370,3 +370,8 @@ function tearDown(canvasEl) {
     clearInterval(tickTimer);
     canvasEl.onclick = null;
 }
+
+window._debug = {
+    get state() { return state },
+    entities,
+}
