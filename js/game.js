@@ -236,6 +236,9 @@ class GameController extends Entity {
 
         if (!state.gameRunning) return;
 
+        // TODO just move this logic into the ship entity
+        if (!state.ship.updating) return;
+
         // handle cooldowns and actions
         state.cooldown = Math.max(0, state.cooldown - timeSinceLastTick);
         if (state.cooldown == 0 && state.currentCallback) {
@@ -260,6 +263,8 @@ class GameController extends Entity {
         drawParallax(window.parallaxBgOrange, .03, 0, -400);
         drawParallax(window.parallaxBgRed, .05, 0, -800);
 
+        // TODO move into separate entity
+        if (!state.ship.updating) return;
         // distance
         ctx.fillStyle = 'white';
         ctx.font = '32px sans-serif';
@@ -890,10 +895,22 @@ function bezier(t)
 class TitleScreen extends Entity {
     zIndex = 1000;
     canClickWhilePaused = true;
+    fadeStart = 0;
+    fadeUntil = 0;
 
     checkClick(x, y) { return this; }
 
     onClick(x, y) {
+        if (this.fadeStart) return;
+
+        this.fadeStart = performance.now();
+        this.fadeUntil = this.fadeStart + 750;
+    }
+
+    tick() {
+        if (!this.fadeStart) return;
+
+        this.alive = false;
 
         // Fade out title music, start main music
         var current_t = 0.0;
@@ -911,8 +928,7 @@ class TitleScreen extends Entity {
             }
         }, interval * 1000);
 
-        this.alive = false;
-        state.paused = false;
+        state.ship.updating = true;
 
         entities.push(new DebugDisplay());
         entities.push(
@@ -934,14 +950,37 @@ class TitleScreen extends Entity {
         );
     }
 
-    render() {
+    render(now) {
         ctx.save();
+
+        if (this.fadeStart) {
+            const fadeTime = Math.min(now, this.fadeUntil) - this.fadeStart;
+            const fadeProgress = fadeTime / (this.fadeUntil - this.fadeStart);
+            ctx.globalAlpha = 1 - fadeProgress;
+        }
+
+        const fontStack =  `'Book Antiqua', Palatino, 'Palatino Linotype', 'Palatino LT STD', Georgia, serif`;
         ctx.fillStyle = '#242738';
-        ctx.fillText('click anywhere to start', 100, 100);
-        ctx.font = "48pt 'BIZ UDPMincho', serif";
 	    ctx.textAlign = "center";
-	    ctx.fillText('i sink not', 1024 / 2, 768 / 2);
-	    ctx.textAlign = "start";
+        ctx.font = `87pt ${fontStack}`;
+        let text = 'I Sink Not';
+        let textMetrics = ctx.measureText(text);
+        let yPosition = CANVAS_WIDTH / 5;
+	    ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
+        ctx.font = `24pt ${fontStack}`;
+
+        yPosition += textMetrics.actualBoundingBoxAscent + 15;
+        text = 'A Ludum Dare game by';
+        textMetrics = ctx.measureText(text);
+        ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
+        
+        yPosition += textMetrics.actualBoundingBoxAscent + 15;
+        text = 'Dan Ellis, Matt Lee, and Neil Williams';
+        ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
+        
+        yPosition += (textMetrics.actualBoundingBoxAscent + 15) * 3;
+        ctx.fillText('Click anywhere to start', CANVAS_WIDTH / 2, yPosition);
+
         ctx.restore();
     }
 }
@@ -984,9 +1023,9 @@ export function setUp(canvasEl_) {
 
     const ship = new Ship();
 
-    state = new State(ship);
+    ship.updating = false;
 
-    state.paused = true;
+    state = new State(ship);
 
     ctx = canvasEl.getContext('2d');
 
