@@ -60,8 +60,6 @@ class State {
     debug = false;
     gameRunning = true;
     paused = false;
-    floodRate = 0;
-    floodAmount = 0;
     shipDraught = 10;
     distanceTraveled = 0;
 
@@ -193,11 +191,9 @@ class GameController extends Entity {
 
         const stats = state.ship.getStats();
         state.speed = stats.speed || 0;
-        state.floodRate = stats.floodRate || 0;
 
-        state.distanceTraveled += timeSinceLastTick * ((state.speed + state.speedBoost) / 100);
-        state.floodAmount += timeSinceLastTick * (state.floodRate / 100) + 0.1;
-        state.shipDraught = state.floodAmount + 10; // TODO: smarter
+        state.distanceTraveled += timeSinceLastTick/100 * (state.speed + state.speedBoost);
+        state.shipDraught += timeSinceLastTick/100 * (stats.weight - (stats.buoyancy || 0));
     }
 
     render(now) {
@@ -226,6 +222,8 @@ class ShipModule extends Entity {
     solid = true;
     sprite = null;
 
+    weight = 5;
+
     static canBuildAt(x, y) { return true; }
 
     constructor(ship, x, y) {
@@ -236,8 +234,8 @@ class ShipModule extends Entity {
         this.y = y;
     }
 
-    get wet() {
-        return this.y * SHIP_MODULE_HEIGHT < state.shipDraught;
+    get percentSubmerged() {
+        return Math.max(0, Math.min(1, (state.shipDraught - (this.y * SHIP_MODULE_HEIGHT)) / SHIP_MODULE_HEIGHT));
     }
 
     getStats() {
@@ -263,6 +261,9 @@ class HullModule extends ShipModule {
     renderTopHull = false;
     renderRightHull = false;
 
+    floodAmount = 0;
+    buoyancy = 20;
+
     constructor(ship, x, y) {
         super(ship, x, y);
         this.state = 'normal';
@@ -280,7 +281,7 @@ class HullModule extends ShipModule {
     }
 
     tick(timeSinceLastTick, now) {
-        if (!this.wet)
+        if (!this.percentSubmerged > 0)
             return;
 
         if (Math.random() < .5) {
@@ -296,12 +297,15 @@ class HullModule extends ShipModule {
                 sound.breaking.play();
                 this.state = 'leaking';
             }
+        } else {
+            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 1);
         }
     }
 
     getStats() {
+        const percentSubmerged = this.percentSubmerged;
         return {
-            floodRate: this.state == 'normal' ? 0 : 1,
+            'buoyancy': percentSubmerged > 0 ? this.buoyancy * percentSubmerged - this.floodAmount: 0,
         }
     }
 
@@ -371,13 +375,15 @@ class SailModule extends ShipModule {
 
     getStats() {
         return {
-            speed: 1,
+            speed: this.percentSubmerged > .5 ? 0 : 1,
         }
     }
 }
 
 class BoilerModule extends ShipModule {
     sprite = shipSpriteSheet.sprites.boiler;
+
+    weight = 10;
 
     static canBuildAt(modX, modY) {
         const moduleBelow = state.ship.getModule(modX, modY - 1);
@@ -568,13 +574,12 @@ class Ship extends Entity {
     }
 
     getStats() {
-        const stats = {};
+        const stats = {weight: 0};
         for (const [modY, row] of this.modules.entries()) {
-            if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught)
-                continue;
 
             for (const [modX, module] of row.entries()) {
                 if (!module) continue;
+                stats.weight += module.weight;
                 const moduleStats = module.getStats();
                 for (const key in moduleStats) {
                     stats[key] = (stats[key] || 0) + moduleStats[key];
@@ -769,7 +774,15 @@ class TitleScreen extends Entity {
 
         entities.push(new DebugDisplay());
         entities.push(
-            new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
+            new Button(0, '🪣', 1000, null, () => {
+                for (const row of state.ship.modules) {
+                    for (const module of row) {
+                        if (module && module.constructor.name == 'HullModule') {
+                            module.floodAmount = Math.max(0, module.floodAmount-1);
+                        }
+                    }
+                }
+            }),
             new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
             new Button(2, '🐛', 1, () => {
                 state.debug = !state.debug;
