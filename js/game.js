@@ -169,12 +169,22 @@ class GameController extends Entity {
 const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
-class HullModule extends Entity {
-    spriteSheet = shipSpriteSheet;
+class ShipModule extends Entity {
+    updateDisplay() {}
+}
 
-    constructor() {
+class HullModule extends ShipModule {
+    spriteSheet = shipSpriteSheet;
+    renderTopHull = false;
+
+    constructor(ship, x, y) {
         super();
         this.state = 'normal';
+        this.ship = ship;
+        // x and y here are coordinates in the ship's grid, not relative to canvas!
+        this.x = x;
+        this.y = y;
+        this.updateDisplay();
     }
 
     tick(timeSinceLastTick) {
@@ -205,12 +215,26 @@ class HullModule extends Entity {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
 
+        if (this.renderTopHull) {
+            const sprite = this.spriteSheet.sprites.top_hull;
+            if (sprite) {
+                sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            }
+        }
+
         if (this.state == 'leaking') {
             ctx.fillStyle = 'rgba(0, 0, 255, .2)';
             ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         } else if (this.state == 'repairing') {
             ctx.fillStyle = 'rgba(255, 255, 0, .2)';
             ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        }
+    }
+
+    updateDisplay() {
+        const hullAbove = this.ship.getModule(this.x, this.y + 1, HullModule);
+        if (hullAbove) {
+            this.renderTopHull = true;
         }
     }
 }
@@ -354,7 +378,25 @@ class Ship extends Entity {
 
     addModule(x, y, ModuleClass) {
         if (!this.modules[y]) this.modules[y] = [];
-        this.modules[y][x] = new ModuleClass(this);
+        this.modules[y][x] = new ModuleClass(this, x, y);
+
+        this.updateModule(x - 1, y);
+        this.updateModule(x + 1, y);
+        this.updateModule(x, y - 1);
+        this.updateModule(x, y + 1);
+    }
+
+    updateModule(x, y) {
+        const module = this.getModule(x, y);
+        if (module) module.updateDisplay();
+    }
+
+    getModule(x, y, ModuleClass = undefined) {
+        if (!this.modules[y]) return;
+        const module = this.modules[y][x];
+        if (!module) return;
+        if (ModuleClass && !(module instanceof ModuleClass)) return;
+        return module;
     }
 }
 
