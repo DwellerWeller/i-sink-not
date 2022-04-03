@@ -125,7 +125,7 @@ class GameController extends Entity {
     tick(timeSinceLastTick) {
         // lose condition
         // TODO: don't hard code the water height here
-        if (state.shipHeight - WATER_HEIGHT < state.shipDraught) {
+        if (state.shipHeight < state.shipDraught) {
             state.gameRunning = false;
             tearDown(canvasEl);
 
