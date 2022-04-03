@@ -711,15 +711,20 @@ class PropellerModule extends ShipModule {
         return moduleRight && moduleRight.constructor.name == 'BoilerModule';
     }
 
+    get isSpinning() {
+        const boilerModule = state.ship.getModule(this.x + 1, this.y);
+        return boilerModule.isGeneratingSteam;
+    }
+
     getStats() {
         return {
-            speed: state.ship.getModule(this.x + 1, this.y).isGeneratingSteam ? 5 : 0,
+            speed: this.isSpinning ? 5 : 0,
         }
     }
 
     render() {
         super.render();
-        if (this.percentSubmerged < .5) {
+        if (this.isSpinning) {
             this.blurSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
