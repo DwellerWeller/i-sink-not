@@ -34,3 +34,5 @@ main_song.addEventListener('timeupdate', function(){
         this.play();
     }
 });
+
+export var gameover  = new Audio('sound/gameover.mp3');
