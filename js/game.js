@@ -232,7 +232,7 @@ class ModuleBuilder extends Entity {
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
-                this.ship.modules[this.modY][this.modX] = new ev.target.moduleType();
+                this.ship.addModule(this.modX, this.modY, ev.target.moduleType);
                 state.cooldown = 1000;
             } else if (ev.target.id != 'cancel') {
                 return;
@@ -258,8 +258,9 @@ class ModuleBuilder extends Entity {
 
 class Ship extends Entity {
     columns = 4;
+    rows = 4;
 
-    modules = [[]];
+    modules = [];
 
     constructor() {
         super();
@@ -293,12 +294,13 @@ class Ship extends Entity {
         ctx.strokeRect(0, -box.height, box.width, box.height);
 
         ctx.translate(-SHIP_MODULE_WIDTH, 0);
-        for (let y = 0; y < this.modules.length; y++) {
+        for (let y = 0; y < this.rows; y++) {
             const row = this.modules[y];
 
-            for (let x = 0; x < row.length; x++) {
+            for (let x = 0; x < this.columns; x++) {
                 ctx.translate(SHIP_MODULE_WIDTH, 0);
-                const module = row[x];
+
+                const module = row ? row[x] : null;
                 // debug
                 ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
                 if (module) {
@@ -309,7 +311,7 @@ class Ship extends Entity {
                     ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
                 }
             }
-            ctx.translate(row.length * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
+            ctx.translate(this.columns * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
         }
 
         ctx.restore();
@@ -322,25 +324,25 @@ class Ship extends Entity {
 
         const moduleBox = { x: 0, y: 0, width: SHIP_MODULE_WIDTH, height: SHIP_MODULE_HEIGHT };
 
-        for (let modY = 0; modY < this.modules.length; modY++) {
+        for (let modY = 0; modY < this.rows; modY++) {
             const row = this.modules[modY];
 
-            for (let modX = 0; modX < row.length; modX++) {
+            for (let modX = 0; modX < this.columns; modX++) {
                 moduleBox.x = x + (modX * SHIP_MODULE_WIDTH);
                 moduleBox.y = y + ((modY + 1) * -SHIP_MODULE_HEIGHT);
 
 
                 if (isPointInBox(mouseX, mouseY, moduleBox)) {
-                    const module = row[modX];
+                    const module = row ? row[modX] : null;
 
                     if (module) {
                         console.log(`clicked on module in position ${modX}, ${modY}`);
                         return module;
                     } else {
                         // can only build when adjacent to something else
-                        if ((modX > 0 && row[modX-1]) || // someone to our left
-                            (modX < row.length-1 && row[modX+1]) || // someone to our right
-                            (modY > 0 && this.modules[modY-1][modX]) // someone below
+                        if ((modX > 0 && row && row[modX-1]) || // someone to our left
+                            (modX < this.columns-1 && row && row[modX+1]) || // someone to our right
+                            (modY > 0 && this.modules[modY-1] && this.modules[modY-1][modX]) // someone below
                             ) {
                             return new ModuleBuilder(this, modX, modY);
                         }
@@ -348,6 +350,11 @@ class Ship extends Entity {
                 }
             }
         }
+    }
+
+    addModule(x, y, ModuleClass) {
+        if (!this.modules[y]) this.modules[y] = [];
+        this.modules[y][x] = new ModuleClass(this);
     }
 }
 
@@ -433,12 +440,7 @@ export function setUp(canvasEl_) {
         new Button(1, '🧹', 1000, () => {state.speed = Math.min(state.speed + 1, 5)}),
     );
 
-    ship.modules = [
-        [null, new HullModule(), null, null],
-        [null, null, null, null],
-        [null, null, null, null],
-        [null, null, null, null],
-    ];
+    ship.addModule(1, 0, HullModule);
 
     entities.push(ship);
 
