@@ -448,8 +448,28 @@ class ModuleBuilder extends Entity {
         for (const moduleType of moduleTypes) {
             if (moduleType.canBuildAt(this.modX, this.modY)) {
                 const moduleEl = document.createElement('button');
+                const sprite = moduleType.sprite;
                 moduleEl.moduleType = moduleType;
-                moduleEl.textContent = moduleType.name;
+                moduleEl.style.position = 'relative';
+                moduleEl.style.overflow = 'hidden';
+                
+                if (sprite) {
+                    const div = document.createElement('div');
+                    div.style.background = `url(${sprite.spriteSheet.src}) no-repeat -${sprite.x}px -${sprite.y}px`;
+                    div.style.width = sprite.width + 'px';
+                    div.style.height = sprite.height + 'px';
+                    div.style.position = 'absolute';
+                    div.style.transform = 'translate(-50%, -50%) scale(.5)';
+                    div.style.transformOrigin = 'center';
+                    div.style.top = '50%';
+                    div.style.left = '50%';
+                    div.style.pointerEvents = 'none';
+
+                    moduleEl.appendChild(div);
+                } else {
+                    moduleEl.textContent = moduleType.name;
+                }
+
                 menuEl.appendChild(moduleEl);
                 buildingAllowed = true;
             }
