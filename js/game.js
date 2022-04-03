@@ -366,7 +366,22 @@ class SailModule extends ShipModule {
     }
 }
 
-const moduleTypes = [HullModule, SailModule];
+class BoilerModule extends ShipModule {
+    sprite = shipSpriteSheet.sprites.boiler;
+
+    static canBuildAt(modX, modY) {
+        const moduleBelow = state.ship.getModule(modX, modY - 1);
+        return moduleBelow && moduleBelow.solid;
+    }
+
+    render() {
+        if (this.sprite) {
+            this.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
+    }
+}
+
+const moduleTypes = [HullModule, SailModule, BoilerModule];
 
 class ModuleBuilder extends Entity {
     constructor(ship, modX, modY) {
