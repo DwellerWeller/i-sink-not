@@ -225,11 +225,9 @@ class GameController extends Entity {
     tick(timeSinceLastTick) {
         const timeElapsed = performance.now() - firstFrame;
         // lose condition
-        // TODO: don't hard code the water height here
         if (state.shipHeight < state.shipDraught && state.gameRunning) {
+            // TODO: if the top row of modules is all NullModule don't count it
             state.gameRunning = false;
-            // tearDown(canvasEl);
-            // end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
             sound.gameover.play();
             entities.push(new GameOverScreen(state.distanceTraveled, state.timeElapsed));
         }
@@ -331,7 +329,17 @@ class HullModule extends ShipModule {
     static canBuildAt(modX, modY) {
         // we can only be built on top of other hull modules (or at the bottom)
         if (modY == 0) {
-            return true;
+            if (modX > 0) {
+                if (state.ship.getModule(modX-1, modY).solid)
+                    return true;
+            }
+
+            if (modX < state.ship.columns-1) {
+                if (state.ship.getModule(modX+1, modY).solid)
+                    return true;
+            }
+
+            return false;
         }
 
         const moduleBelow = state.ship.getModule(modX, modY - 1);
@@ -405,6 +413,113 @@ class HullModule extends ShipModule {
         const moduleAbove = this.ship.getModule(this.x, this.y + 1);
         this.renderTopHull = moduleAbove && moduleAbove.solid;
         this.renderRightHull = !!this.ship.getModule(this.x + 1, this.y, HullModule);
+    }
+}
+
+class NullModule extends ShipModule {
+    weight = 0;
+    solid = false;
+
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.buildOptions = [];
+    }
+
+    onMouseOver() {
+        const buildOptions = [];
+        for (const moduleType of moduleTypes) {
+            if (moduleType.canBuildAt(this.x, this.y)) {
+                buildOptions.push(moduleType);
+            }
+        }
+        this.buildOptions = buildOptions;
+        console.log('buildOptions',  this.buildOptions);
+
+        if (this.buildOptions.length > 0) {
+            canvasEl.style.cursor = 'pointer';
+        }
+    }
+
+    onMouseOut() {
+        console.log('onMouseOut');
+        this.buildOptions = [];
+        canvasEl.style.cursor = 'default';
+    }
+
+    onClick(x, y) {
+        console.log('onClick', this.buildOptions);
+        if (this.buildOptions.length == 0) {
+            return;
+        }
+
+        sound.confirm.play();
+        const menuEl = document.createElement('div');
+        menuEl.id = 'module-menu';
+        menuEl.onclick = (ev) => {
+            console.log(this);
+            if (ev.target.moduleType) {
+                sound.building.play();
+                state.cooldown = 1000;
+                this.ship.addModule(this.x, this.y, ConstructionModule);
+                state.currentCallback = () => {
+                    this.ship.addModule(this.x, this.y, ev.target.moduleType);
+                };
+            } else if (ev.target.id != 'cancel') {
+                return;
+            } else if (ev.target.id == 'cancel') {
+                sound.cancel.play();
+            }
+
+            menuEl.remove();
+            state.paused = false;
+        };
+
+        for (const moduleType of this.buildOptions) {
+            const moduleEl = document.createElement('button');
+            const sprite = moduleType.sprite;
+            moduleEl.moduleType = moduleType;
+            moduleEl.style.position = 'relative';
+            moduleEl.style.overflow = 'hidden';
+ 
+            if (sprite) {
+                const div = document.createElement('div');
+                div.style.background = `url(${sprite.spriteSheet.src}) no-repeat -${sprite.x}px -${sprite.y}px`;
+                div.style.width = sprite.width + 'px';
+                div.style.height = sprite.height + 'px';
+                div.style.position = 'absolute';
+                div.style.transform = 'translate(-50%, -50%) scale(.5)';
+                div.style.transformOrigin = 'center';
+                div.style.top = '50%';
+                div.style.left = '50%';
+                div.style.pointerEvents = 'none';
+
+                moduleEl.appendChild(div);
+            } else {
+                moduleEl.textContent = moduleType.name;
+            }
+
+            menuEl.appendChild(moduleEl);
+        }
+
+        const cancelEl = document.createElement('button');
+        cancelEl.id = 'cancel';
+        cancelEl.textContent = '🚫';
+        menuEl.appendChild(cancelEl);
+
+        state.paused = true;
+        document.body.appendChild(menuEl);
+    }
+
+    render() {
+        if (this.buildOptions.length > 0) {
+            ctx.fillStyle = 'rgba(255, 255, 0, .5)';
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        }
+
+        if (state.debug) {
+            ctx.strokeStyle = 'white';
+            ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
+        }
     }
 }
 
@@ -508,80 +623,6 @@ class FinSailModule extends ShipModule {
 
 const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule];
 
-class ModuleBuilder extends Entity {
-    constructor(ship, modX, modY) {
-        super();
-        this.ship = ship;
-        this.modX = modX;
-        this.modY = modY;
-    }
-
-    onClick(x, y) {
-        sound.confirm.play();
-        const menuEl = document.createElement('div');
-        menuEl.id = 'module-menu';
-        menuEl.onclick = (ev) => {
-            if (ev.target.moduleType) {
-                sound.building.play();
-                state.cooldown = 1000;
-                this.ship.addModule(this.modX, this.modY, ConstructionModule);
-                state.currentCallback = () => {
-                    this.ship.addModule(this.modX, this.modY, ev.target.moduleType);
-                };
-            } else if (ev.target.id != 'cancel') {
-                return;
-            } else if (ev.target.id == 'cancel') {
-                sound.cancel.play();
-            }
-
-            menuEl.remove();
-            state.paused = false;
-        };
-
-        let buildingAllowed = false;
-        for (const moduleType of moduleTypes) {
-            if (moduleType.canBuildAt(this.modX, this.modY)) {
-                const moduleEl = document.createElement('button');
-                const sprite = moduleType.sprite;
-                moduleEl.moduleType = moduleType;
-                moduleEl.style.position = 'relative';
-                moduleEl.style.overflow = 'hidden';
-                
-                if (sprite) {
-                    const div = document.createElement('div');
-                    div.style.background = `url(${sprite.spriteSheet.src}) no-repeat -${sprite.x}px -${sprite.y}px`;
-                    div.style.width = sprite.width + 'px';
-                    div.style.height = sprite.height + 'px';
-                    div.style.position = 'absolute';
-                    div.style.transform = 'translate(-50%, -50%) scale(.5)';
-                    div.style.transformOrigin = 'center';
-                    div.style.top = '50%';
-                    div.style.left = '50%';
-                    div.style.pointerEvents = 'none';
-
-                    moduleEl.appendChild(div);
-                } else {
-                    moduleEl.textContent = moduleType.name;
-                }
-
-                menuEl.appendChild(moduleEl);
-                buildingAllowed = true;
-            }
-        }
-
-        if (!buildingAllowed) {
-            return;
-        }
-
-        const cancelEl = document.createElement('button');
-        cancelEl.id = 'cancel';
-        cancelEl.textContent = '🚫';
-        menuEl.appendChild(cancelEl);
-
-        state.paused = true;
-        document.body.appendChild(menuEl);
-    }
-}
 
 class Ship extends Entity {
     columns = 4;
@@ -637,10 +678,6 @@ class Ship extends Entity {
                 state.debug && ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
                 if (module) {
                     module.render(now);
-                } else if (state.debug) {
-                    // debug
-                    ctx.strokeStyle = 'white';
-                    ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
                 }
                 ctx.translate(-translateX, -translateY);
             }
@@ -669,18 +706,7 @@ class Ship extends Entity {
 
                 if (isPointInBox(mouseX, mouseY, moduleBox)) {
                     const module = row ? row[modX] : null;
-
-                    if (module) {
-                        return module;
-                    } else {
-                        // can only build when adjacent to something else
-                        if ((modX > 0 && row && row[modX-1]) || // someone to our left
-                            (modX < this.columns-1 && row && row[modX+1]) || // someone to our right
-                            (modY > 0 && this.modules[modY-1] && this.modules[modY-1][modX]) // someone below
-                            ) {
-                            return new ModuleBuilder(this, modX, modY);
-                        }
-                    }
+                    return module;
                 }
             }
         }
@@ -691,7 +717,6 @@ class Ship extends Entity {
         for (const [modY, row] of this.modules.entries()) {
 
             for (const [modX, module] of row.entries()) {
-                if (!module) continue;
                 stats.weight += module.weight;
                 const moduleStats = module.getStats();
                 for (const key in moduleStats) {
@@ -705,7 +730,15 @@ class Ship extends Entity {
     addModule(x, y, ModuleClass) {
         if (y + 1 >= this.rows) this.rows = y + 2;
 
-        if (!this.modules[y]) this.modules[y] = [];
+        for (let yOffset = 0; yOffset < 2; yOffset++) {
+            if (!this.modules[y+yOffset]) {
+                const newRow = [];
+                for (let i = 0; i<this.columns; i++) {
+                    newRow.push(new NullModule(this, i, y+yOffset));
+                }
+                this.modules[y+yOffset] = newRow;
+            }
+        }
         this.modules[y][x] = new ModuleClass(this, x, y);
 
         this.updateModule(x - 1, y);
@@ -729,7 +762,6 @@ class Ship extends Entity {
     getModule(x, y, ModuleClass = undefined) {
         if (!this.modules[y]) return;
         const module = this.modules[y][x];
-        if (!module) return;
         if (ModuleClass && !(module instanceof ModuleClass)) return;
         return module;
     }
