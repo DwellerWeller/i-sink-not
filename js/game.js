@@ -397,6 +397,11 @@ class BoilerModule extends ShipModule {
     weight = 10;
 
     static canBuildAt(modX, modY) {
+        if (modX == 0) {
+            // don't allow building at the back where there's no room for a propellor
+            return false;
+        }
+
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
