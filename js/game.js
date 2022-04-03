@@ -30,7 +30,7 @@ const entities = [];
 class State {
     gameRunning = true;
     paused = false;
-    floodRate = 1;
+    floodRate = 0;
     floodAmount = 0;
     shipDraught = 10;
     distanceTraveled = 0;
@@ -153,18 +153,53 @@ class GameController extends Entity {
 const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
-class ShipModule extends Entity {
+class HullModule extends Entity {
     spriteSheet = shipSpriteSheet;
+
+    constructor() {
+        super();
+        this.state = 'normal';
+    }
+
+    tick(timeSinceLastTick) {
+        if (this.state == 'normal') {
+            if (Math.random() < 0.01) {
+                console.log('sprang a leak!');
+                this.state = 'leaking';
+                state.floodRate += 1;
+            }
+        }
+    }
+
+    onClick(x, y) {
+        if (this.state == 'leaking') {
+            this.state = 'repairing';
+
+            state.cooldown = 1000;
+            state.currentCallback = () => {
+                this.state = 'normal';
+                state.floodRate = Math.max(0, state.floodRate - 1);
+            };
+        }
+    }
 
     render() {
         const sprite = this.spriteSheet.sprites.hull;
         if (sprite) {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
+
+        if (this.state == 'leaking') {
+            ctx.fillStyle = 'rgba(0, 0, 255, .2)';
+            ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        } else if (this.state == 'repairing') {
+            ctx.fillStyle = 'rgba(255, 255, 0, .2)';
+            ctx.fillRect(0, 0, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        }
     }
 }
 
-const moduleTypes = [ShipModule];
+const moduleTypes = [HullModule];
 
 class ModuleBuilder extends Entity {
     constructor(ship, modX, modY) {
@@ -223,6 +258,13 @@ class Ship extends Entity {
     }
 
     tick(timeSinceLastTick) {
+        for (const row of this.modules) {
+            for (const module of row) {
+                if (module) {
+                    module.tick(timeSinceLastTick);
+                }
+            }
+        }
     }
 
     render(now) {
@@ -376,7 +418,7 @@ export function setUp(canvasEl_) {
     );
 
     ship.modules = [
-        [null, new ShipModule(), null, null],
+        [null, new HullModule(), null, null],
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
