@@ -1,5 +1,7 @@
 import * as end from './end.js';
 
+import { shipSpriteSheet } from './art.js';
+
 let canvasEl;
 let ctx;
 let CANVAS_WIDTH, CANVAS_HEIGHT;
@@ -22,17 +24,6 @@ class Entity {
 }
 
 const entities = [];
-
-function loadImage(url) {
-    return new Promise(resolve => {
-        const img = new Image();
-        img.addEventListener('load', () => {
-            resolve(img);
-        });
-        img.src = url;
-    });
-}
-const shipImage = await loadImage('art/ship-hull.png');
 
 /* game state */
 
@@ -171,14 +162,17 @@ class GameController extends Entity {
     }
 }
 
-const SHIP_MODULE_HEIGHT = 100;
-const SHIP_MODULE_WIDTH = 100;
+const SHIP_MODULE_HEIGHT = 128;
+const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
-    image = shipImage;
+    spriteSheet = shipSpriteSheet;
 
     render() {
-        ctx.drawImage(this.image, 0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
+        const sprite = this.spriteSheet.sprites.hull;
+        if (sprite) {
+            sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
     }
 }
 
