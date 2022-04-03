@@ -156,13 +156,13 @@ function onClick(ev) {
     // entities.push(new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, x, y));
 }
 
-function drawParallax(img, speed, y_offset) {
-    var numImages = Math.ceil(CANVAS_WIDTH / img.width) + 1;
+function drawParallax(img, speed, x_offset, y_offset) {
+    var numImages = Math.ceil(CANVAS_WIDTH / (img.width + x_offset)) + 1;
     var xpos = state.bgDistanceTraveled * 100 * speed % img.width;
     ctx.save();
     ctx.translate(-xpos, 0);
     for (var i = 0; i < numImages; i++) {
-     ctx.drawImage(img, i * img.width * 1, y_offset);
+     ctx.drawImage(img, i * img.width * 1 + x_offset, y_offset);
     }
     ctx.restore();
     const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
@@ -202,9 +202,9 @@ class GameController extends Entity {
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         // bg parallax
-        drawParallax(window.parallaxBgYellow, .01, -200);
-        drawParallax(window.parallaxBgOrange, .03, -400);
-        drawParallax(window.parallaxBgRed, .05, -800);
+        drawParallax(window.parallaxBgYellow, .01, 0, -200);
+        drawParallax(window.parallaxBgOrange, .03, 0, -400);
+        drawParallax(window.parallaxBgRed, .05, 0, -800);
 
         // distance
         ctx.fillStyle = 'white';
@@ -661,16 +661,17 @@ class Ship extends Entity {
 }
 
 class Water extends Entity {
-    constructor(height, alpha, parallaxSpeed) {
+    constructor(height, alpha, parallaxSpeed, x_offset) {
         super();
         this.height = height;
         this.alpha = alpha;
         this.parallaxSpeed = parallaxSpeed;
+        this.x_offset = x_offset;
     }
 
     render(now) {
         ctx.globalAlpha = this.alpha;
-        drawParallax(window.wavesImg, this.parallaxSpeed, CANVAS_HEIGHT - this.height - 75 + getWaterBob());
+        drawParallax(window.wavesImg, this.parallaxSpeed, this.x_offset, CANVAS_HEIGHT - this.height - 75 + getWaterBob());
         ctx.globalAlpha = 1;
     }
 }
@@ -870,11 +871,11 @@ export function setUp(canvasEl_) {
 
     ship.addModule(1, 0, HullModule);
 
-    entities.push(new Water(WATER_HEIGHT + 10, 1, .1));
+    entities.push(new Water(WATER_HEIGHT + 10, 1, .1, 0));
 
     entities.push(ship);
 
-    const foregroundWater = new Water(WATER_HEIGHT, .9, .15);
+    const foregroundWater = new Water(WATER_HEIGHT, .9, .15, -150);
     foregroundWater.zIndex = 100;
     entities.push(foregroundWater);
 
