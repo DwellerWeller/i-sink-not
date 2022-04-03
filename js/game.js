@@ -85,7 +85,21 @@ class State {
     }
 
     get shipHeight() {
-        return this.ship.box.height;
+        let height = 0;
+        for (const row of this.ship.modules) {
+            let nonNullModuleSeen = false;
+            for (const module of row) {
+                if (module.constructor.name != 'NullModule') {
+                    nonNullModuleSeen = true;
+                    break;
+                }
+            }
+
+            if (nonNullModuleSeen) {
+                height += SHIP_MODULE_HEIGHT;
+            }
+        }
+        return height;
     }
 }
 
