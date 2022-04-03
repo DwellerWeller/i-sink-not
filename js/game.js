@@ -804,10 +804,32 @@ function render(now) {
     requestAnimationFrame(render);
 }
 
+function bezier(t)
+{
+    return 1 - (t * t * (3.0 - 2.0 * t));
+}
+
 class TitleScreen extends Entity {
     checkClick(x, y) { return this; }
 
     onClick(x, y) {
+
+        // Fade out title music, start main music
+        var current_t = 0.0;
+        var interval = 0.2;
+        var fade_time = 3.0;
+        var fadeAudio = setInterval(function () {
+            if (sound.theme_song.volume > 0.0) {
+                sound.theme_song.volume = bezier(current_t);
+            }
+            current_t += interval / fade_time;
+            if (sound.theme_song.volume <= 0.0) {
+                sound.theme_song.pause();
+                clearInterval(fadeAudio);
+                setTimeout(function () {sound.main_song.play();}, 1000)
+            }
+        }, interval * 1000);
+
         this.alive = false;
         state.paused = false;
 
