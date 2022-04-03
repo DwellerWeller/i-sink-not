@@ -298,7 +298,7 @@ class ModuleBuilder extends Entity {
 
 class Ship extends Entity {
     columns = 4;
-    rows = 4;
+    rows = 1;
 
     modules = [];
 
@@ -396,6 +396,8 @@ class Ship extends Entity {
     }
 
     addModule(x, y, ModuleClass) {
+        if (y + 1 >= this.rows) this.rows = y + 2;
+
         if (!this.modules[y]) this.modules[y] = [];
         this.modules[y][x] = new ModuleClass(this, x, y);
 
