@@ -441,7 +441,6 @@ class NullModule extends ShipModule {
             }
         }
         this.buildOptions = buildOptions;
-        console.log('buildOptions',  this.buildOptions);
 
         if (this.buildOptions.length > 0) {
             canvasEl.style.cursor = 'pointer';
@@ -449,13 +448,11 @@ class NullModule extends ShipModule {
     }
 
     onMouseOut() {
-        console.log('onMouseOut');
         this.buildOptions = [];
         canvasEl.style.cursor = 'default';
     }
 
     onClick(x, y) {
-        console.log('onClick', this.buildOptions);
         if (this.buildOptions.length == 0) {
             return;
         }
@@ -464,7 +461,6 @@ class NullModule extends ShipModule {
         const menuEl = document.createElement('div');
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
-            console.log(this);
             if (ev.target.moduleType) {
                 sound.building.play();
                 state.cooldown = 1000;
@@ -519,7 +515,7 @@ class NullModule extends ShipModule {
     }
 
     render() {
-        if (this.buildOptions.length > 0) {
+        if (state.cooldown == 0 && this.buildOptions.length > 0) {
             ctx.fillStyle = 'rgba(255, 255, 0, .5)';
             ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
