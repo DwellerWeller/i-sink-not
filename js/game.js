@@ -853,7 +853,9 @@ class TitleScreen extends Entity {
                 for (const row of state.ship.modules) {
                     for (const module of row) {
                         if (module && module.constructor.name == 'HullModule') {
-                            module.floodAmount = Math.max(0, module.floodAmount-1);
+                            if (module.percentSubmerged < 1) {
+                                module.floodAmount = Math.max(0, module.floodAmount-1);
+                            }
                         }
                     }
                 }
