@@ -313,17 +313,19 @@ class Ship extends Entity {
 
         const { box } = this;
 
-        ctx.translate(box.x, box.y);
         ctx.strokeStyle = 'red';
         ctx.strokeRect(0, -box.height, box.width, box.height);
 
-        ctx.translate(-SHIP_MODULE_WIDTH, 0);
-        for (let y = 0; y < this.rows; y++) {
+        let y = this.rows;
+        while (y-->0) {
             const row = this.modules[y];
+            let x = this.columns;
+            while (x-->0) {
+                const translateX = box.x + (x * SHIP_MODULE_WIDTH);
+                const translateY = box.y + (y * -SHIP_MODULE_HEIGHT);
 
-            for (let x = 0; x < this.columns; x++) {
-                ctx.translate(SHIP_MODULE_WIDTH, 0);
-
+                ctx.translate(translateX, translateY);
+                
                 const module = row ? row[x] : null;
                 // debug
                 ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
@@ -334,8 +336,8 @@ class Ship extends Entity {
                     ctx.strokeStyle = 'white';
                     ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
                 }
+                ctx.translate(-translateX, -translateY);
             }
-            ctx.translate(this.columns * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
         }
 
         ctx.restore();
