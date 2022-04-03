@@ -7,6 +7,8 @@ let CANVAS_WIDTH, CANVAS_HEIGHT;
 const BUTTON_SIZE = 50;
 const BUTTON_MARGIN = 20;
 
+const WATER_HEIGHT = 100;
+
 class Entity {
     render(timeSinceLastTick) {}
     tick(now) {}
@@ -33,6 +35,7 @@ const shipImage = await loadImage('art/ship-hull.png');
 
 class State {
     gameRunning = true;
+    paused = false;
     floodRate = 1;
     floodAmount = 0;
     shipDraught = 10;
@@ -85,6 +88,19 @@ class Button extends Entity {
     }
 }
 
+class ModuleBuilder extends Entity {
+    constructor(ship, modX, modY) {
+        super();
+        this.ship = ship;
+        this.modX = modX;
+        this.modY = modY;
+    }
+
+    onClick(x, y) {
+        this.ship.modules[this.modY][this.modX] = new ShipModule();
+    }
+}
+
 /**************/
 
 function onClick(ev) {
@@ -99,7 +115,7 @@ function onClick(ev) {
     for (let entity of entities) {
         let res = entity.checkClick(x, y);
         if (res) {
-            entity.onClick(x, y);
+            res.onClick(x, y);
             break;
         }
     }
@@ -109,7 +125,7 @@ class GameController extends Entity {
     tick(timeSinceLastTick) {
         // lose condition
         // TODO: don't hard code the water height here
-        if (state.shipHeight - 100 < state.shipDraught) {
+        if (state.shipHeight - WATER_HEIGHT < state.shipDraught) {
             state.gameRunning = false;
             tearDown(canvasEl);
 
@@ -217,19 +233,27 @@ class Ship extends Entity {
 
         for (let modY = 0; modY < this.modules.length; modY++) {
             const row = this.modules[modY];
-            for (let modX = 0; modX < row.length; modX++) {
-                const module = row[modX];
-                if (!module) continue;
 
-                moduleBox.x =  x + (modX * SHIP_MODULE_WIDTH);
+            for (let modX = 0; modX < row.length; modX++) {
+                moduleBox.x = x + (modX * SHIP_MODULE_WIDTH);
                 moduleBox.y = y + ((modY + 1) * -SHIP_MODULE_HEIGHT);
 
-                // TODO - i would move the logic for individual modules to the module class, but they don't currently
-                // know their position in the ship or have a reference to the ship, so i'll just do it here
-                // let res = module.checkClick(x, y);
+
                 if (isPointInBox(mouseX, mouseY, moduleBox)) {
-                    console.log(`clicked on module in position ${modX}, ${modY}`);
-                    return module;
+                    const module = row[modX];
+
+                    if (module) {
+                        console.log(`clicked on module in position ${modX}, ${modY}`);
+                        return module;
+                    } else {
+                        // can only build when adjacent to something else
+                        if ((modX > 0 && row[modX-1]) || // someone to our left
+                            (modX < row.length-1 && row[modX+1]) || // someone to our right
+                            (modY > 0 && this.modules[modY-1][modX]) // someone below
+                            ) {
+                            return new ModuleBuilder(this, modX, modY);
+                        }
+                    }
                 }
             }
         }
@@ -240,7 +264,7 @@ class Water extends Entity {
     render(now) {
         // water
         ctx.fillStyle = 'rgba(0, 0, 128, .7)';
-        ctx.fillRect(0, CANVAS_HEIGHT - 100 - 5 * Math.sin((now - firstFrame) / 250), CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.fillRect(0, CANVAS_HEIGHT - WATER_HEIGHT - 5 * Math.sin((now - firstFrame) / 250), CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 }
 
@@ -269,8 +293,10 @@ function tick() {
     const now = performance.now();
     const timeSinceLastTick = now - previousTick;
 
-    for (let entity of entities) {
-        entity.tick(timeSinceLastTick);
+    if (!state.paused) {
+        for (let entity of entities) {
+            entity.tick(timeSinceLastTick);
+        }
     }
 
     previousTick = now;
@@ -315,8 +341,9 @@ export function setUp(canvasEl_) {
     const ship = new Ship();
     ship.modules = [
         [null, new ShipModule(), null, null],
-        [null, null, new ShipModule(), null],
-        [null, new ShipModule(), null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
     ];
 
     entities.push(ship);
