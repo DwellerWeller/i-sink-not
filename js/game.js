@@ -858,7 +858,7 @@ class TitleScreen extends Entity {
                     }
                 }
             }),
-            new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
+            new Button(1, '🧹', 1000, () => {state.speedBoost = 1; sound.row.play()}, () => {state.speedBoost = 0}),
             new Button(2, '🐛', 1, () => {
                 state.debug = !state.debug;
             }),

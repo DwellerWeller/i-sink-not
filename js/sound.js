@@ -9,7 +9,10 @@ export var confirm  = new Audio('sound/confirm.mp3');
 confirm.volume = 0.70;
 
 export var cancel  = new Audio('sound/cancel.mp3');
-cancel.volume = 0.50;
+cancel.volume = 0.50
+
+export var row  = new Audio('sound/row.mp3');
+row.volume = 0.70;
 
 export var theme_song = new Audio('sound/i sink not - song 1 - title.mp3');
 theme_song.addEventListener('timeupdate', function(){
