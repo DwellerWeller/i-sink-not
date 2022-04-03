@@ -6,15 +6,9 @@ export function setUp(canvasEl) {
     canvasEl.onclick = function() { onClick(canvasEl) };
 
     const ctx = canvasEl.getContext('2d');
-    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-
-    const fontSize = 120;
-    ctx.fillStyle = '#ccc';
-    ctx.font = `${fontSize}px sans-serif`;
-    const textMetrics = ctx.measureText('➤');
-    ctx.fillText('➤', canvasEl.width/2 - textMetrics.width/2, canvasEl.height/2 + fontSize/2);
+    ctx.drawImage(window.playImg, canvasEl.width/2 - window.playImg.width/2, canvasEl.height/2 - window.playImg.height/2);
 }
 
 function onClick(canvasEl) {

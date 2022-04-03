@@ -118,4 +118,8 @@ const wavesImg = await loadImage('art/waves.png');
 
 window.wavesImg = wavesImg;
 
+const playImg = await loadImage('art/play.png');
+
+window.playImg = playImg;
+
 export { shipSpriteSheet };
