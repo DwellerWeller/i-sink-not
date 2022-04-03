@@ -185,11 +185,12 @@ class Ship extends Entity {
         ctx.strokeStyle = 'red';
         ctx.strokeRect(0, -box.height, box.width, box.height);
 
+        ctx.translate(-SHIP_MODULE_WIDTH, 0);
         for (let y = 0; y < this.modules.length; y++) {
             const row = this.modules[y];
 
             for (let x = 0; x < row.length; x++) {
-                ctx.translate(x * SHIP_MODULE_WIDTH, 0);
+                ctx.translate(SHIP_MODULE_WIDTH, 0);
                 const module = row[x];
                 // debug
                 ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
@@ -200,8 +201,8 @@ class Ship extends Entity {
                     ctx.strokeStyle = 'white';
                     ctx.strokeRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH);
                 }
-                }
-            ctx.translate((row.length - 1) * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
+            }
+            ctx.translate(row.length * -SHIP_MODULE_WIDTH, -SHIP_MODULE_HEIGHT);
         }
 
         ctx.restore();
@@ -313,9 +314,9 @@ export function setUp(canvasEl_) {
 
     const ship = new Ship();
     ship.modules = [
-        [new ShipModule(), null],
-        [null, new ShipModule()],
-        [new ShipModule(), null],
+        [null, new ShipModule(), null, null],
+        [null, null, new ShipModule(), null],
+        [null, new ShipModule(), null, null],
     ];
 
     entities.push(ship);
