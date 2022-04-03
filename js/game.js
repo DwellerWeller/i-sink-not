@@ -250,6 +250,8 @@ class ShipModule extends Entity {
 
 class HullModule extends ShipModule {
     sprite = shipSpriteSheet.sprites.hull;
+    defaultSprite = shipSpriteSheet.sprites.hull;
+    bustedSprite = shipSpriteSheet.sprites.busted_hull;
     topHullSprite = shipSpriteSheet.sprites.top_hull;
     sideHullSprite = shipSpriteSheet.sprites.side_hull;
 
@@ -301,6 +303,7 @@ class HullModule extends ShipModule {
     }
 
     render() {
+        this.sprite = this.state !== 'normal' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
         if (this.renderTopHull) {
@@ -315,10 +318,7 @@ class HullModule extends ShipModule {
             }
         }
 
-        if (this.state == 'leaking') {
-            ctx.fillStyle = 'rgba(0, 0, 255, .2)';
-            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-        } else if (this.state == 'repairing') {
+        if (this.state == 'repairing') {
             ctx.fillStyle = 'rgba(255, 255, 0, .2)';
             ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
