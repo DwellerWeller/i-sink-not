@@ -10,8 +10,9 @@ function loadImage(url) {
 }
 
 class Sprite {
-    constructor(spriteSheet, x, y, width, height, anchorX, anchorY) {
+    constructor(spriteSheet, name, x, y, width, height, anchorX, anchorY) {
         this.spriteSheet = spriteSheet;
+        this.name = name;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -46,7 +47,7 @@ class SpriteSheet {
     }
 
     createSprite(name, x, y, width, height, anchorX = 0, anchorY = 0) {
-        const sprite = new Sprite(this, x, y, width, height, anchorX, anchorY);
+        const sprite = new Sprite(this, name, x, y, width, height, anchorX, anchorY);
         this.sprites[name] = sprite;
         return sprite;
     }
@@ -58,11 +59,16 @@ const shipSpriteSheet = new SpriteSheet(loadImage('art/ship-spritesheet.png'));
 shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
 shipSpriteSheet.createSprite('side_hull', 318, 872, 84, 74, -130, -46);
+shipSpriteSheet.createSprite('busted_hull', 233, 629, 184, 146, 28, 8);
+shipSpriteSheet.createSprite('scaffolding', 430, 852, 165, 112, 20, -20);
 shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199, -60, 66);
 shipSpriteSheet.createSprite('sail', 279, 37, 145, 225, 8, 98);
 shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71, 32, 35);
+shipSpriteSheet.createSprite('water_spray', 500, 203, 94, 143, 47, 72);
 shipSpriteSheet.createSprite('boiler', 48, 321, 161, 262, 14, 128);
 shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215, 0, 70);
+shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76);
+shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86);
 
 window.shipSpriteSheet = shipSpriteSheet;
 
