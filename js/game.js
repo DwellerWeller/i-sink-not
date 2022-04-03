@@ -312,8 +312,6 @@ class ModuleBuilder extends Entity {
     }
 
     onClick(x, y) {
-        state.paused = true;
-
         const menuEl = document.createElement('div');
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
@@ -351,6 +349,7 @@ class ModuleBuilder extends Entity {
         cancelEl.textContent = '🚫';
         menuEl.appendChild(cancelEl);
 
+        state.paused = true;
         document.body.appendChild(menuEl);
     }
 }
