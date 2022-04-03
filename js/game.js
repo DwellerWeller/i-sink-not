@@ -36,6 +36,7 @@ class State {
     shipDraught = 10;
     distanceTraveled = 0;
     speed = 0;
+    speedBoost = 0;
     cooldown = 0;
     currentCallback = null;
     timeElapsed = 0;
@@ -62,11 +63,12 @@ class Button extends Entity {
     static SIZE = 50;
     static MARGIN = 20;
 
-    constructor(index, icon, cost, callback) {
+    constructor(index, icon, cost, startCallback, endCallback) {
         super();
         this.icon = icon;
         this.cost = cost;
-        this.callback = callback;
+        this.startCallback = startCallback;
+        this.endCallback = endCallback;
 
         this.box = {
             x: Button.MARGIN,
@@ -85,7 +87,10 @@ class Button extends Entity {
 
     onClick(x, y) {
         state.cooldown = this.cost;
-        state.currentCallback = this.callback;
+        state.currentCallback = this.endCallback;
+
+        if (this.startCallback)
+            this.startCallback();
     }
 
     render() {
@@ -147,8 +152,11 @@ class GameController extends Entity {
             state.currentCallback = null;
         }
 
-        state.distanceTraveled += timeSinceLastTick * (state.speed / 100);
-        state.speed = Math.max(0, state.speed - .1); // TODO: make this a function of draught
+        const stats = state.ship.getStats();
+        state.speed = stats.speed || 0;
+        state.floodRate = stats.floodRate || 0;
+
+        state.distanceTraveled += timeSinceLastTick * ((state.speed + state.speedBoost) / 100);
         state.floodAmount += timeSinceLastTick * (state.floodRate / 100);
         state.shipDraught = state.floodAmount + 10; // TODO: smarter
     }
@@ -186,12 +194,12 @@ class ShipModule extends Entity {
         this.y = y;
     }
 
-    get submerged() {
-        return (this.y+1) * SHIP_MODULE_HEIGHT < state.shipDraught;
-    }
-
     get wet() {
         return this.y * SHIP_MODULE_HEIGHT < state.shipDraught;
+    }
+
+    getStats() {
+        return {};
     }
 
     updateDisplay() {}
@@ -218,17 +226,19 @@ class HullModule extends ShipModule {
     }
 
     tick(timeSinceLastTick) {
-        if (this.submerged)
-            return;
-
         if (!this.wet)
             return;
 
         if (this.state == 'normal') {
             if (Math.random() < 0.01) {
                 this.state = 'leaking';
-                state.floodRate += 1;
             }
+        }
+    }
+
+    getStats() {
+        return {
+            floodRate: this.state == 'normal' ? 0 : 1,
         }
     }
 
@@ -239,7 +249,6 @@ class HullModule extends ShipModule {
             state.cooldown = 1000;
             state.currentCallback = () => {
                 this.state = 'normal';
-                state.floodRate = Math.max(0, state.floodRate - 1);
             };
         }
     }
@@ -293,6 +302,12 @@ class SailModule extends ShipModule {
         // must be on top of a hull
         const moduleBelow = state.ship.modules[modY-1][modX];
         return moduleBelow && moduleBelow.constructor.name == 'HullModule';
+    }
+
+    getStats() {
+        return {
+            speed: 1,
+        }
     }
 
     render() {
@@ -373,7 +388,12 @@ class Ship extends Entity {
     }
 
     tick(timeSinceLastTick) {
-        for (const row of this.modules) {
+        for (const [modY, row] of this.modules.entries()) {
+            // underwater modules don't tick
+            if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught) {
+                continue;
+            }
+
             for (const module of row) {
                 if (module) {
                     module.tick(timeSinceLastTick);
@@ -428,19 +448,21 @@ class Ship extends Entity {
         for (let modY = 0; modY < this.rows; modY++) {
             const row = this.modules[modY];
 
+            // can't click on stuff that's underwater
+            if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught) {
+                continue;
+            }
+
             for (let modX = 0; modX < this.columns; modX++) {
                 moduleBox.x = x + (modX * SHIP_MODULE_WIDTH);
                 moduleBox.y = y + ((modY + 1) * -SHIP_MODULE_HEIGHT);
-
 
                 if (isPointInBox(mouseX, mouseY, moduleBox)) {
                     const module = row ? row[modX] : null;
 
                     if (module) {
                         console.log(`clicked on module in position ${modX}, ${modY}`);
-                        if (!module.submerged) {
-                            return module;
-                        }
+                        return module;
                     } else {
                         // can only build when adjacent to something else
                         if ((modX > 0 && row && row[modX-1]) || // someone to our left
@@ -453,6 +475,23 @@ class Ship extends Entity {
                 }
             }
         }
+    }
+
+    getStats() {
+        const stats = {};
+        for (const [modY, row] of this.modules.entries()) {
+            if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught)
+                continue;
+
+            for (const [modX, module] of row.entries()) {
+                if (!module) continue;
+                const moduleStats = module.getStats();
+                for (const key in moduleStats) {
+                    stats[key] = (stats[key] || 0) + moduleStats[key];
+                }
+            }
+        }
+        return stats;
     }
 
     addModule(x, y, ModuleClass) {
@@ -565,8 +604,8 @@ export function setUp(canvasEl_) {
     entities.push(new DebugDisplay());
 
     entities.push(
-        new Button(0, '🪣', 1000, () => {state.floodAmount = Math.max(0, state.floodAmount - 1)}),
-        new Button(1, '🧹', 1000, () => {state.speed = Math.min(state.speed + 1, 5)}),
+        new Button(0, '🪣', 1000, null, () => {state.floodAmount = Math.max(0, state.floodAmount - 2)}),
+        new Button(1, '🧹', 1000, () => {state.speedBoost = 1}, () => {state.speedBoost = 0}),
     );
 
     if (state.debug) {
