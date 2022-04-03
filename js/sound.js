@@ -14,6 +14,9 @@ cancel.volume = 0.50
 export var row  = new Audio('sound/row.mp3');
 row.volume = 0.70;
 
+export var bucket  = new Audio('sound/bucket.mp3');
+bucket.volume = 0.70;
+
 export var theme_song = new Audio('sound/i sink not - song 1 - title.mp3');
 theme_song.addEventListener('timeupdate', function(){
     var buffer = .44;

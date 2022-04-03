@@ -849,7 +849,7 @@ class TitleScreen extends Entity {
 
         entities.push(new DebugDisplay());
         entities.push(
-            new Button(0, '🪣', 1000, null, () => {
+            new Button(0, '🪣', 1000, () => { sound.bucket.play() }, () => {
                 for (const row of state.ship.modules) {
                     for (const module of row) {
                         if (module && module.constructor.name == 'HullModule') {
