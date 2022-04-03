@@ -438,7 +438,6 @@ class NullModule extends ShipModule {
             }
         }
         this.buildOptions = buildOptions;
-        console.log('buildOptions',  this.buildOptions);
 
         if (this.buildOptions.length > 0) {
             canvasEl.style.cursor = 'pointer';
@@ -446,13 +445,11 @@ class NullModule extends ShipModule {
     }
 
     onMouseOut() {
-        console.log('onMouseOut');
         this.buildOptions = [];
         canvasEl.style.cursor = 'default';
     }
 
     onClick(x, y) {
-        console.log('onClick', this.buildOptions);
         if (this.buildOptions.length == 0) {
             return;
         }
@@ -461,7 +458,6 @@ class NullModule extends ShipModule {
         const menuEl = document.createElement('div');
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
-            console.log(this);
             if (ev.target.moduleType) {
                 sound.building.play();
                 state.cooldown = 1000;
