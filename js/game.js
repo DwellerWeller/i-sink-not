@@ -52,6 +52,9 @@ class Entity {
     checkClick(x, y) { return null; }
     // callback for when this entity is clicked
     onClick(x, y) {}
+
+    onMouseOver() {}
+    onMouseOut() {}
 }
 
 const entities = [];
@@ -74,6 +77,8 @@ class State {
     cooldown = 0;
     currentCallback = null;
     timeElapsed = 0;
+
+    hoveredEntity = null;
     
     constructor(ship) {
         this.ship = ship;
@@ -103,6 +108,7 @@ class Button extends Entity {
         this.cost = cost;
         this.startCallback = startCallback;
         this.endCallback = endCallback;
+        this.hovered = false;
 
         this.box = {
             x: Button.MARGIN,
@@ -127,9 +133,19 @@ class Button extends Entity {
             this.startCallback();
     }
 
+    onMouseOver() {
+        this.hovered = true;
+        canvasEl.style.cursor = 'pointer';
+    }
+
+    onMouseOut() {
+        this.hovered = false;
+        canvasEl.style.cursor = 'default';
+    }
+
     render() {
         const { x, y, width, height } = this.box;
-        ctx.fillStyle = state.cooldown > 0 ? 'grey' : 'cornsilk';
+        ctx.fillStyle = state.cooldown > 0 ? 'grey' : this.hovered ? 'white' : 'cornsilk';
         ctx.fillRect(x, y, width, height);
         ctx.strokeText(this.icon, x + 10, y + 36);
     }
@@ -158,6 +174,38 @@ function onClick(ev) {
 
     // console.log('creating a particle');
     // entities.push(new Particle(performance.now() + 1000, shipSpriteSheet.sprites.steam_puff, x, y));
+}
+
+function onMouseMove(ev) {
+    const x = ev.offsetX;
+    const y = ev.offsetY;
+
+    if (state.hoveredEntity && !state.hoveredEntity.alive) {
+        state.hoveredEntity = null;
+    }
+    
+    let newHoveredEntity = null;
+    for (let entity of entities) {
+        if (!state.paused || entity.canClickWhilePaused) {
+            let res = entity.checkClick(x, y);
+            if (res) {
+                newHoveredEntity = res;
+                break;
+            }
+        }
+    }
+
+    if (newHoveredEntity != state.hoveredEntity) {
+        if (state.hoveredEntity) {
+            state.hoveredEntity.onMouseOut();
+        }
+
+        state.hoveredEntity = newHoveredEntity;
+
+        if (state.hoveredEntity) {
+            state.hoveredEntity.onMouseOver();
+        }
+    }
 }
 
 function drawParallax(img, speed, x_offset, y_offset) {
@@ -605,8 +653,6 @@ class Ship extends Entity {
         if (!state.gameRunning) return;
         const { x, y } = this.box;
 
-        console.log(`checking click at ${mouseX} ${mouseY}`);
-
         const moduleBox = { x: 0, y: 0, width: SHIP_MODULE_WIDTH, height: SHIP_MODULE_HEIGHT };
 
         for (let modY = 0; modY < this.rows; modY++) {
@@ -625,7 +671,6 @@ class Ship extends Entity {
                     const module = row ? row[modX] : null;
 
                     if (module) {
-                        console.log(`clicked on module in position ${modX}, ${modY}`);
                         return module;
                     } else {
                         // can only build when adjacent to something else
@@ -977,11 +1022,13 @@ export function setUp(canvasEl_) {
     render(firstFrame);
 
     canvasEl.onclick = onClick;
+    canvasEl.onmousemove = onMouseMove;
 }
 
 function tearDown(canvasEl) {
     clearInterval(tickTimer);
     canvasEl.onclick = null;
+    canvasEl.onmousemove = null;
 }
 
 window._debug = {
