@@ -10,7 +10,8 @@ let CANVAS_WIDTH, CANVAS_HEIGHT;
 const BUTTON_SIZE = 50;
 const BUTTON_MARGIN = 20;
 
-const WATER_HEIGHT = 100;
+const DEFAULT_WATER_HEIGHT = 100;
+let currentWaterHeight = 100;
 
 const vectorLength = vec => Math.sqrt((vec.x ** 2) + (vec.y ** 2));
 
@@ -174,13 +175,14 @@ class GameController extends Entity {
         const timeElapsed = performance.now() - firstFrame;
         // lose condition
         // TODO: don't hard code the water height here
-        if (state.shipHeight < state.shipDraught) {
+        if (state.shipHeight < state.shipDraught && state.gameRunning) {
             state.gameRunning = false;
-            tearDown(canvasEl);
-
-            end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
-            return;
+            // tearDown(canvasEl);
+            // end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
+            entities.push(new GameOverScreen(state.distanceTraveled, state.timeElapsed));
         }
+
+        if (!state.gameRunning) return;
 
         // handle cooldowns and actions
         state.cooldown = Math.max(0, state.cooldown - timeSinceLastTick);
@@ -290,7 +292,7 @@ class HullModule extends ShipModule {
 
         if (Math.random() < .5) {
             const spriteX = this.ship.box.x + (this.x * SHIP_MODULE_WIDTH) + (Math.random() * SHIP_MODULE_WIDTH);
-            const spriteY = CANVAS_HEIGHT - WATER_HEIGHT + getWaterBob();
+            const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
             entities.push(
                 new SprayParticle(now + 600, spriteX, spriteY),
             );
@@ -521,7 +523,7 @@ class Ship extends Entity {
         this.box = {
             // position is anchored to the bottom left corner of the ship
             x: SHIP_MODULE_WIDTH,
-            get y() { return CANVAS_HEIGHT - WATER_HEIGHT + state.shipDraught },
+            get y() { return CANVAS_HEIGHT - currentWaterHeight + state.shipDraught },
             get width() { return ship.columns * SHIP_MODULE_WIDTH },
             get height() { return ship.modules.length * SHIP_MODULE_HEIGHT },
         }
@@ -579,6 +581,7 @@ class Ship extends Entity {
     }
 
     checkClick(mouseX, mouseY) {
+        if (!state.gameRunning) return;
         const { x, y } = this.box;
 
         console.log(`checking click at ${mouseX} ${mouseY}`);
@@ -677,7 +680,13 @@ class Water extends Entity {
 
     render(now) {
         ctx.globalAlpha = this.alpha;
-        drawParallax(window.wavesImg, this.parallaxSpeed, this.x_offset, CANVAS_HEIGHT - this.height - 75 + getWaterBob());
+        const yPosition = CANVAS_HEIGHT - this.height - 75 - currentWaterHeight + getWaterBob();
+        drawParallax(window.wavesImg, this.parallaxSpeed, this.x_offset, yPosition);
+        const imgHeight = wavesImg.height;
+        if (yPosition + imgHeight < CANVAS_HEIGHT) {
+            ctx.fillStyle = '#96b3d1';
+            ctx.fillRect(0, Math.max(0, yPosition + imgHeight), CANVAS_WIDTH, CANVAS_HEIGHT);
+        }
         ctx.globalAlpha = 1;
     }
 }
@@ -797,9 +806,6 @@ let firstFrame;
 let previousFrame;
 
 function render(now) {
-    if (!state.gameRunning) 
-        return;
-
     entities.sort((a, b) => a.zIndex - b.zIndex);
 
     for (let entity of entities) {
@@ -816,6 +822,8 @@ function bezier(t)
 }
 
 class TitleScreen extends Entity {
+    zIndex = 1000;
+
     checkClick(x, y) { return this; }
 
     onClick(x, y) {
@@ -869,6 +877,34 @@ class TitleScreen extends Entity {
     }
 }
 
+class GameOverScreen extends Entity {
+    zIndex = 1000;
+
+    constructor(distanceTraveled, timeElapsed) {
+        super();
+        this.distanceTraveled = distanceTraveled;
+        this.timeElapsed = timeElapsed;
+    }
+
+    tick() {
+        currentWaterHeight += 5;
+    }
+
+    checkClick(x, y) { return this; }
+
+    render() {
+        ctx.fillStyle = 'black';
+        ctx.fillText(`blub blub. you made it ${Math.floor(this.distanceTraveled)} meters and stayed afloat ${Math.floor(this.timeElapsed / 1000)} seconds`, 100, 100);
+        ctx.fillText('click anywhere to try again', 100, 200);
+    }
+
+    onClick() {
+        this.alive = false;
+        currentWaterHeight = DEFAULT_WATER_HEIGHT;
+        setUp(canvasEl);
+    }
+}
+
 /**************/
 
 export function setUp(canvasEl_) {
@@ -899,11 +935,11 @@ export function setUp(canvasEl_) {
 
     ship.addModule(1, 0, HullModule);
 
-    entities.push(new Water(WATER_HEIGHT + 10, 1, .1, 0));
+    entities.push(new Water(10, 1, .1, 0));
 
     entities.push(ship);
 
-    const foregroundWater = new Water(WATER_HEIGHT, .9, .15, -150);
+    const foregroundWater = new Water(0, .9, .15, -150);
     foregroundWater.zIndex = 100;
     entities.push(foregroundWater);
 
