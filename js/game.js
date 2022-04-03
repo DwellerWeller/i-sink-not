@@ -59,6 +59,8 @@ class Entity {
 
 const entities = [];
 
+
+
 /* game state */
 
 class State {
@@ -298,6 +300,14 @@ class ShipModule extends Entity {
         return Math.max(0, Math.min(1, (state.shipDraught - (this.y * SHIP_MODULE_HEIGHT)) / SHIP_MODULE_HEIGHT));
     }
 
+    get globalX() {
+        return this.ship.box.x + (this.x * SHIP_MODULE_WIDTH);
+    }
+
+    get globalY() {
+        return this.ship.box.y + (this.y * -SHIP_MODULE_HEIGHT);
+    }
+
     getStats() {
         return {};
     }
@@ -359,11 +369,9 @@ class HullModule extends ShipModule {
             return;
 
         if (Math.random() < .5) {
-            const spriteX = this.ship.box.x + (this.x * SHIP_MODULE_WIDTH) + (Math.random() * SHIP_MODULE_WIDTH);
+            const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
             const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
-            entities.push(
-                new SprayParticle(now + 600, spriteX, spriteY),
-            );
+            emitParticle(SprayParticle, 600, spriteX, spriteY);
         }
 
         if (this.state == 'normal') {
@@ -753,9 +761,7 @@ class Ship extends Entity {
         const spriteX = this.box.x + (x * SHIP_MODULE_WIDTH);
         const spriteY = this.box.y + (y * -SHIP_MODULE_HEIGHT);
 
-        entities.push(
-            new SteamParticle(performance.now() + 1000, spriteX, spriteY),
-        );
+        emitParticle(SteamParticle, 1000, this.globalX, this.globalY);
     }
 
     updateModule(x, y) {
@@ -815,6 +821,13 @@ class DebugDisplay extends Entity {
             ctx.fillText(text, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, offsetY);
         }
     }
+}
+
+function emitParticle(ParticleClass, life, x, y) {
+    console.log('emitting particle at ', x, y);
+    entities.push(
+        new ParticleClass(performance.now() + life, x, y),
+    );
 }
 
 class Particle extends Entity {
