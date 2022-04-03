@@ -577,6 +577,11 @@ class BoilerModule extends ShipModule {
 
     weight = 10;
 
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.state = 'normal';
+    }
+
     static canBuildAt(modX, modY) {
         if (modX == 0) {
             // don't allow building at the back where there's no room for a propellor
@@ -585,6 +590,60 @@ class BoilerModule extends ShipModule {
 
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
+    }
+
+    tick(timeSinceLastTick, now) {
+        if (this.percentSubmerged >= 1) {
+            return;
+        }
+
+        if (this.state == 'normal') {
+            if (Math.random() < 0.005) {
+                sound.breaking.play();
+                this.state = 'exploded';
+            }
+        }
+    }
+
+    get isGeneratingSteam() {
+        if (this.percentSubmerged > .5)
+            return false;
+
+        return this.state == 'normal';
+    }
+
+    onMouseOver() {
+        if (this.state == 'exploded') {
+            canvasEl.style.cursor = 'grab';
+        }
+    }
+
+    onMouseOut() {
+        canvasEl.style.cursor = 'default';
+    }
+
+    onClick(x, y) {
+        if (this.state == 'exploded') {
+            sound.repairing.play();
+            this.state = 'repairing';
+
+            state.cooldown = 1000;
+            state.currentCallback = () => {
+                this.state = 'normal';
+            };
+        }
+    }
+
+    render() {
+        super.render();
+
+        if (this.state == 'exploded') {
+            ctx.fillStyle = 'rgba(255, 0, 0, .2)';
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        } else if (this.state == 'repairing') {
+            ctx.fillStyle = 'rgba(255, 255, 0, .2)';
+            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        }
     }
 }
 
@@ -609,7 +668,7 @@ class PropellerModule extends ShipModule {
 
     getStats() {
         return {
-            speed: this.percentSubmerged < .5 ? 5 : 0,
+            speed: state.ship.getModule(this.x + 1, this.y).isGeneratingSteam ? 5 : 0,
         }
     }
 
