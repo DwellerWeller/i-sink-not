@@ -157,7 +157,7 @@ class GameController extends Entity {
         state.floodRate = stats.floodRate || 0;
 
         state.distanceTraveled += timeSinceLastTick * ((state.speed + state.speedBoost) / 100);
-        state.floodAmount += timeSinceLastTick * (state.floodRate / 100);
+        state.floodAmount += timeSinceLastTick * (state.floodRate / 100) + 0.1;
         state.shipDraught = state.floodAmount + 10; // TODO: smarter
     }
 
