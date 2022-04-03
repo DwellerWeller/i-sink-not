@@ -82,6 +82,9 @@ class State {
     timeElapsed = 0;
 
     hoveredEntity = null;
+
+    currentMouseX = -1;
+    currentMouseY = -1;
     
     constructor(ship) {
         this.ship = ship;
@@ -103,6 +106,10 @@ class State {
             }
         }
         return height;
+    }
+
+    triggerSyntheticMouseMove() {
+        onMouseMove(new MouseEvent('mousemove', {offsetX: this.currentMouseX, offsetY: this.currentMouseY}));
     }
 }
 
@@ -199,6 +206,9 @@ function onClick(ev) {
 function onMouseMove(ev) {
     const x = ev.offsetX;
     const y = ev.offsetY;
+
+    state.currentMouseX = x;
+    state.currentMouseY = y;
 
     if (state.hoveredEntity && !state.hoveredEntity.alive) {
         state.hoveredEntity = null;
@@ -507,6 +517,7 @@ class NullModule extends ShipModule {
                 this.ship.addModule(this.x, this.y, ConstructionModule);
                 state.currentCallback = () => {
                     this.ship.addModule(this.x, this.y, ev.target.moduleType);
+                    state.triggerSyntheticMouseMove();
                 };
             } else if (ev.target.id != 'cancel') {
                 return;
