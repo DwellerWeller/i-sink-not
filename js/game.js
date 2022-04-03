@@ -35,6 +35,11 @@ class State {
     floodAmount = 0;
     shipDraught = 10;
     distanceTraveled = 0;
+
+    // A higher-resolution version of distanceTraveled.  It won't match exactly though,
+    // since it's for rendering the background.  It just has to look reasonably nice.
+    bgDistanceTraveled = 0;
+
     speed = 0;
     speedBoost = 0;
     cooldown = 0;
@@ -123,13 +128,15 @@ function onClick(ev) {
 
 function drawParallax(img, speed, y_offset) {
     var numImages = Math.ceil(CANVAS_WIDTH / img.width) + 1;
-    var xpos = performance.now() * speed * 1 % img.width;
+    var xpos = state.bgDistanceTraveled * 100 * speed % img.width;
     ctx.save();
     ctx.translate(-xpos, 0);
     for (var i = 0; i < numImages; i++) {
      ctx.drawImage(img, i * img.width * 1, y_offset);
     }
     ctx.restore();
+    const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
+    state.bgDistanceTraveled += timeSinceLastFrame * ((state.speed + state.speedBoost) / 1000);
 }
 
 class GameController extends Entity {
