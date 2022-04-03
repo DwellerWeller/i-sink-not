@@ -50,6 +50,11 @@ class State {
 
 let state;
 
+function getWaterBob(offset = 0, magnitude = 5) {
+    const timeElapsed = performance.now() - firstFrame;
+    return magnitude * Math.sin((timeElapsed + offset) / 250);
+}
+
 const isPointInBox = (x, y, box) => !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
 
 class Button extends Entity {
@@ -123,13 +128,13 @@ function drawParallax(img, speed, y_offset) {
 
 class GameController extends Entity {
     tick(timeSinceLastTick) {
+        const timeElapsed = performance.now() - firstFrame;
         // lose condition
         // TODO: don't hard code the water height here
         if (state.shipHeight < state.shipDraught) {
             state.gameRunning = false;
             tearDown(canvasEl);
 
-            const timeElapsed = performance.now() - firstFrame;
             end.setUp(canvasEl, state.distanceTraveled, state.timeElapsed);
             return;
         }
@@ -292,7 +297,7 @@ class Ship extends Entity {
         this.box = {
             // position is anchored to the bottom left corner of the ship
             x: SHIP_MODULE_WIDTH,
-            get y() { return CANVAS_HEIGHT - SHIP_MODULE_HEIGHT + state.shipDraught },
+            get y() { return CANVAS_HEIGHT - WATER_HEIGHT + state.shipDraught },
             get width() { return ship.columns * SHIP_MODULE_WIDTH },
             get height() { return ship.modules.length * SHIP_MODULE_HEIGHT },
         }
@@ -310,6 +315,7 @@ class Ship extends Entity {
 
     render(now) {
         ctx.save();
+        ctx.translate(0, getWaterBob(250, 3));
 
         const { box } = this;
 
@@ -406,7 +412,7 @@ class Water extends Entity {
     render(now) {
         // water
         ctx.fillStyle = 'rgba(0, 0, 128, .7)';
-        ctx.fillRect(0, CANVAS_HEIGHT - WATER_HEIGHT - 5 * Math.sin((now - firstFrame) / 250), CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.fillRect(0, CANVAS_HEIGHT - WATER_HEIGHT + getWaterBob(), CANVAS_WIDTH, CANVAS_HEIGHT);
     }
 }
 
