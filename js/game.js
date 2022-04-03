@@ -240,7 +240,10 @@ class ShipModule extends Entity {
 }
 
 class HullModule extends ShipModule {
-    spriteSheet = shipSpriteSheet;
+    defaultSprite = shipSpriteSheet.sprites.hull;
+    topHullSprite = shipSpriteSheet.sprites.top_hull;
+    sideHullSprite = shipSpriteSheet.sprites.side_hull;
+
     renderTopHull = false;
     renderRightHull = false;
 
@@ -289,22 +292,19 @@ class HullModule extends ShipModule {
     }
 
     render() {
-        const sprite = this.spriteSheet.sprites.hull;
-        if (sprite) {
-            sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        if (this.defaultSprite) {
+            this.defaultSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
 
         if (this.renderTopHull) {
-            const sprite = this.spriteSheet.sprites.top_hull;
-            if (sprite) {
-                sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            if (this.topHullSprite) {
+                this.topHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
         }
 
         if (this.renderRightHull) {
-            const sprite = this.spriteSheet.sprites.side_hull;
-            if (sprite) {
-                sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            if (this.sideHullSprite) {
+                this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
         }
 
@@ -331,7 +331,7 @@ class ConstructionModule extends ShipModule {
 }
 
 class SailModule extends ShipModule {
-    spriteSheet = shipSpriteSheet;
+    sailSprite = shipSpriteSheet.sprites.sail;
 
     static canBuildAt(modX, modY) {
         // TODO: this is just notional stuff for testing the logic, feel free to change how sails work
@@ -353,8 +353,8 @@ class SailModule extends ShipModule {
     }
 
     render() {
-        if (this.spriteSheet.sprites.sail) {
-            this.spriteSheet.sprites.sail.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        if (this.sailSprite) {
+            this.sailSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
 }

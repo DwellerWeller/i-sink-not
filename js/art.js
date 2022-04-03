@@ -10,8 +10,8 @@ function loadImage(url) {
 }
 
 class Sprite {
-    constructor(img, x, y, width, height, anchorX, anchorY) {
-        this.img = img;
+    constructor(spriteSheet, x, y, width, height, anchorX, anchorY) {
+        this.spriteSheet = spriteSheet;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -21,8 +21,9 @@ class Sprite {
     }
 
     draw(ctx, x, y, width, height) {
+        if (!this.spriteSheet.img) return;
         ctx.drawImage(
-            this.img,
+            this.spriteSheet.img,
             // source (spritesheet) location
             this.x,
             this.y,
@@ -40,20 +41,18 @@ class Sprite {
 class SpriteSheet {
     sprites = {};
 
-    constructor(img) {
-        this.img = img;
+    constructor(imgLoader) {
+        imgLoader.then(img => this.img = img);
     }
 
     createSprite(name, x, y, width, height, anchorX = 0, anchorY = 0) {
-        const sprite = new Sprite(this.img, x, y, width, height, anchorX, anchorY);
+        const sprite = new Sprite(this, x, y, width, height, anchorX, anchorY);
         this.sprites[name] = sprite;
         return sprite;
     }
 }
 
-const shipSpriteSheetImg = await loadImage('art/ship-spritesheet.png');
-
-export const shipSpriteSheet = new SpriteSheet(shipSpriteSheetImg);
+const shipSpriteSheet = new SpriteSheet(loadImage('art/ship-spritesheet.png'));
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
 shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
@@ -78,3 +77,5 @@ window.parallaxBgOrange = parallaxBgOrange;
 const parallaxBgYellow = await loadImage('art/parallax bg yellow.png');
 
 window.parallaxBgYellow = parallaxBgYellow;
+
+export { shipSpriteSheet };
