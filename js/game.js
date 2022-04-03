@@ -42,11 +42,18 @@ class State {
     floodRate = 1;
     floodAmount = 0;
     shipDraught = 10;
-    shipHeight = shipImage.height;
     distanceTraveled = 0;
     speed = 0;
     cooldown = 0;
     currentCallback = null;
+    
+    constructor(ship) {
+        this.ship = ship;
+    }
+
+    get shipHeight() {
+        return this.ship.box.height;
+    }
 }
 
 let state;
@@ -327,7 +334,9 @@ export function setUp(canvasEl_) {
     CANVAS_WIDTH = canvasEl.width;
     CANVAS_HEIGHT = canvasEl.height;
 
-    state = new State;
+    const ship = new Ship();
+
+    state = new State(ship);
 
     ctx = canvasEl.getContext('2d');
 
@@ -341,7 +350,6 @@ export function setUp(canvasEl_) {
         new Button(1, '🧹', 1000, () => {state.speed = Math.min(state.speed + 1, 5)}),
     );
 
-    const ship = new Ship();
     ship.modules = [
         [null, new ShipModule(), null, null],
         [null, null, null, null],
