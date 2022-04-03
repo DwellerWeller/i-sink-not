@@ -66,6 +66,7 @@ class State {
     gameRunning = true;
     paused = false;
     shipDraught = 10;
+    timeAfloat = 0;
     distanceTraveled = 0;
 
     // A higher-resolution version of distanceTraveled.  It won't match exactly though,
@@ -264,6 +265,7 @@ class GameController extends Entity {
         const stats = state.ship.getStats();
         state.speed = stats.speed || 0;
 
+        state.timeAfloat += timeSinceLastTick;
         state.distanceTraveled += timeSinceLastTick/100 * (state.speed + state.speedBoost);
         state.shipDraught += timeSinceLastTick/100 * (stats.weight - (stats.buoyancy || 0));
     }
@@ -280,12 +282,24 @@ class GameController extends Entity {
 
         // TODO move into separate entity
         if (!state.ship.updating) return;
+        if (!state.gameRunning) return;
+
         // distance
         ctx.fillStyle = 'white';
         ctx.font = '32px sans-serif';
+
+        const textMargin = 10;
+
         const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
-        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - 10, Math.floor(textMetrics.actualBoundingBoxAscent) + 10);
+        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - textMargin, Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin);
+
+        // time
+        const secondsAfloat = Math.floor(state.timeAfloat / 1000);
+        const timeText = `${secondsAfloat}s`;
+        const timeTextMetrics = ctx.measureText(timeText);
+        ctx.fillText(timeText, Math.floor(CANVAS_WIDTH - timeTextMetrics.width) - textMargin, (Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin) * 2);
+
     }
 }
 
@@ -877,7 +891,7 @@ class DebugDisplay extends Entity {
         ctx.fillStyle = 'black';
         ctx.font = '24px sans-serif';
 
-        let offsetY = 50;
+        let offsetY = 75;
         for (let key of this.stateKeys) {
             let val = state[key];
             if (typeof val === 'number') val = val.toFixed(2);
