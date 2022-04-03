@@ -202,8 +202,8 @@ class GameController extends Entity {
 
         // bg parallax
         drawParallax(window.parallaxBgYellow, .01, -200);
-        drawParallax(window.parallaxBgOrange, .05, -400);
-        drawParallax(window.parallaxBgRed, .1, -800);
+        drawParallax(window.parallaxBgOrange, .03, -400);
+        drawParallax(window.parallaxBgRed, .05, -800);
 
         // distance
         ctx.fillStyle = 'white';
@@ -607,9 +607,7 @@ class Ship extends Entity {
 
 class Water extends Entity {
     render(now) {
-        // water
-        ctx.fillStyle = 'rgba(0, 0, 128, .7)';
-        ctx.fillRect(0, CANVAS_HEIGHT - WATER_HEIGHT + getWaterBob(), CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawParallax(window.wavesImg, .15, CANVAS_HEIGHT - WATER_HEIGHT - 75 + getWaterBob());
     }
 }
 

@@ -78,4 +78,8 @@ const parallaxBgYellow = await loadImage('art/parallax bg yellow.png');
 
 window.parallaxBgYellow = parallaxBgYellow;
 
+const wavesImg = await loadImage('art/waves.png');
+
+window.wavesImg = wavesImg;
+
 export { shipSpriteSheet };
