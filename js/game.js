@@ -454,6 +454,10 @@ class HullModule extends ShipModule {
 }
 
 class NullModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.square_bg;
+    static outlineSprite = shipSpriteSheet.sprites.square_outline;
+    
+    showOutline = false;
     solid = false;
 
     constructor(ship, x, y) {
@@ -476,12 +480,14 @@ class NullModule extends ShipModule {
 
         if (this.buildOptions.length > 0) {
             canvasEl.style.cursor = 'pointer';
+            this.showOutline = true;
         }
     }
 
     onMouseOut() {
         this.buildOptions = [];
         canvasEl.style.cursor = 'default';
+        this.showOutline = false;
     }
 
     onClick(x, y) {
@@ -547,9 +553,14 @@ class NullModule extends ShipModule {
     }
 
     render() {
-        if (state.cooldown == 0 && this.buildOptions.length > 0) {
-            ctx.fillStyle = 'rgba(255, 255, 0, .5)';
-            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        if (!state.ship.updating) return;
+
+        super.render();
+
+        if (state.cooldown == 0 && this.showOutline) {
+            if (this.showOutline) {
+                NullModule.outlineSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            }
         }
 
         if (state.debug) {

@@ -102,8 +102,8 @@ shipSpriteSheet.createSprite('bit_coin', 683, 544, 13, 13);
 shipSpriteSheet.createSprite('balloon_base', 869, 817, 134, 152, 0, 18);
 shipSpriteSheet.createSprite('balloon_top', 607, 742, 251, 239, 50, 160);
 shipSpriteSheet.createSprite('castle', 799, 309, 195, 175, 32, 32);
-shipSpriteSheet.createSprite('square_outline', 737, 600, 116, 119);
-shipSpriteSheet.createSprite('square_bg', 611, 598, 113, 117);
+shipSpriteSheet.createSprite('square_outline', 737, 600, 116, 119, -8, -8);
+shipSpriteSheet.createSprite('square_bg', 611, 598, 113, 117, -8, -8);
 shipSpriteSheet.createSprite('circle_bg', 459, 757, 72, 74);
 
 
