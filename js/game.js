@@ -785,6 +785,10 @@ class BoilerModule extends ShipModule {
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
+
+    get emissionsClass() {
+        return this.damageLevel == 'normal' ? BoilerSteamParticle : BoilerSmokeParticle;
+    }
         
     tick(timeSinceLastTick, now) {
         if (this.percentSubmerged >= 1) {
@@ -802,8 +806,7 @@ class BoilerModule extends ShipModule {
         }
 
         if (this.isGeneratingSteam && !this.hasSmokeStack && Math.random() < timeSinceLastTick / 200) {
-            // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
-            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
+            emitParticle(this.emissionsClass, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
         }
     }
 
@@ -960,12 +963,16 @@ class SmokeStackModule extends ShipModule {
         return mod && mod.solid;
     }
 
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.boiler = ship.getModule(x, y-1);
+    }
+
     tick(timeSinceLastTick) {
         super.tick();
 
-        const boiler = this.ship.getModule(this.x, this.y - 1, BoilerModule);
-        if (boiler && boiler.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
-            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+        if (this.boiler && this.boiler.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
+            emitParticle(this.boiler.emissionsClass, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
         }
     }
 }
@@ -1306,6 +1313,10 @@ class BoilerSteamParticle extends SteamParticle {
         x: (Math.random() * 2) - 1,
         y: -1,
     });
+}
+
+class BoilerSmokeParticle extends BoilerSteamParticle {
+    sprite = shipSpriteSheet.sprites.smoke_puff;
 }
 
 class SprayParticle extends Particle {
