@@ -70,7 +70,7 @@ class State {
     debug = false;
     gameRunning = true;
     paused = false;
-    pause_time = 0;
+    paused_time = 0;
     shipDraught = 10;
     timeAfloat = 0;
     distanceTraveled = 0;
