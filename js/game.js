@@ -70,6 +70,7 @@ class State {
     debug = false;
     gameRunning = true;
     paused = false;
+    pause_time = 0;
     shipDraught = 10;
     timeAfloat = 0;
     distanceTraveled = 0;
@@ -133,7 +134,8 @@ class State {
 let state;
 
 function getWaterBob(offset = 0, magnitude = 5, interval = 250) {
-    const timeElapsed = performance.now() - firstFrame;
+    let now = state.paused ? state.paused_time : performance.now();
+    const timeElapsed = now - firstFrame;
     return magnitude * Math.sin((timeElapsed + offset) / interval);
 }
 
@@ -215,8 +217,10 @@ function drawParallax(img, speed, x_offset, y_offset) {
      ctx.drawImage(img, i * img.width * 1 + x_offset, y_offset);
     }
     ctx.restore();
-    const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
-    state.bgDistanceTraveled += timeSinceLastFrame * (state.speed / 1000);
+    if (!state.paused) {
+        const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
+        state.bgDistanceTraveled += timeSinceLastFrame * (state.speed / 1000);
+    }
 }
 
 class GameController extends Entity {
@@ -689,6 +693,7 @@ class NullModule extends ShipModule {
         menuEl.appendChild(cancelEl);
 
         state.paused = true;
+        state.paused_time = performance.now();
         document.body.appendChild(menuEl);
     }
 
