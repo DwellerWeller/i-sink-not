@@ -365,7 +365,7 @@ class HullModule extends ShipModule {
             const right = state.ship.getModule(modX + 1, modY);
             if (right && right.solid) return true;
 
-            return true;
+            return false;
         }
 
         const moduleBelow = state.ship.getModule(modX, modY - 1);
