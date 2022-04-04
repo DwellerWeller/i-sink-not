@@ -1190,7 +1190,7 @@ class TitleScreen extends Entity {
         ctx.font = `24pt ${FONT_STACK}`;
 
         yPosition += textMetrics.actualBoundingBoxAscent + 15;
-        text = 'A Ludum Dare game by';
+        text = 'A game for Ludum Dare 50 by';
         textMetrics = ctx.measureText(text);
         ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
         
