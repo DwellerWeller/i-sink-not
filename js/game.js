@@ -109,6 +109,15 @@ class State {
         return height;
     }
 
+    get difficultyCoefficient() {
+        // difficulty doubles for every:
+        return Math.max(
+            this.distanceTraveled / 1000,  // kilometer, or
+            this.timeElapsed / 1000 / 60,  // minute
+        );
+        // whichever is worse!
+    }
+
     doPlayerAction(delay, callback) {
         this.cooldown = delay;
         this.currentCallback = callback;
@@ -379,7 +388,7 @@ class HullModule extends ShipModule {
         super.tick(timeSinceLastTick, now);
 
         if (this.state == 'normal') {
-            if (Math.random() < 0.005) {
+            if (Math.random() < (state.difficultyCoefficient * 0.005)) {
                 sound.play('breaking');
                 this.state = 'leaking';
             }
@@ -649,7 +658,7 @@ class BoilerModule extends ShipModule {
                 emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
             }
 
-            if (Math.random() < 0.005) {
+            if (Math.random() < (this.difficultyCoefficient * 0.005)) {
                 sound.play('boiler-break');
                 this.state = 'exploded';
             }
@@ -993,6 +1002,7 @@ class DebugDisplay extends Entity {
         super();
         this.stateKeys = Object.keys(state);
         this.stateKeys.push('shipHeight');
+        this.stateKeys.push('difficultyCoefficient');
     }
     render() {
         if (!state.debug) return;
