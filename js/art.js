@@ -73,17 +73,17 @@ export class AnimatedSpriteController {
 const shipSpriteSheet = new SpriteSheet('art/ship-spritesheet.png');
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
-shipSpriteSheet.createSprite('hull', 34, 824, 184, 146, 28, 8);
+shipSpriteSheet.createSprite('hull', 42, 824, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
-shipSpriteSheet.createSprite('side_hull', 318, 872, 84, 74, -130, -46);
+shipSpriteSheet.createSprite('side_hull', 318, 872, 84, 74, 84, -46);
 shipSpriteSheet.createSprite('busted_hull', 233, 629, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('scaffolding', 430, 852, 165, 112, 20, -20);
-shipSpriteSheet.createSprite('propeller', 61, 63, 79, 199, -60, 66);
-shipSpriteSheet.createSprite('sail', 279, 37, 145, 225, 8, 98);
+shipSpriteSheet.createSprite('propeller', 67, 63, 79, 199, 20, 66);
+shipSpriteSheet.createSprite('sail', 173, 43, 145, 225, -36, 98);
 shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71, 32, 35);
 shipSpriteSheet.createSprite('water_spray', 500, 203, 94, 143, 47, 72);
 shipSpriteSheet.createSprite('boiler', 48, 321, 161, 262, 14, 128);
-shipSpriteSheet.createSprite('fin_sail', 254, 315, 151, 215, 0, 70);
+shipSpriteSheet.createSprite('fin_sail', 240, 315, 151, 215, 0, 70);
 shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76);
 shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86);
 shipSpriteSheet.createSprite('oar_icon', 505, 632, 75, 79);
@@ -91,8 +91,8 @@ shipSpriteSheet.createSprite('wind_1', 630, 315, 139, 30);
 shipSpriteSheet.createSprite('wind_2', 633, 361, 134, 33);
 shipSpriteSheet.createSprite('wind_3', 641, 401, 123, 30);
 shipSpriteSheet.createSprite('wind_4', 643, 438, 122, 37);
-shipSpriteSheet.createSprite('propeller_blur_1', 609, 58, 61, 202, -50, 68);
-shipSpriteSheet.createSprite('propeller_blur_2', 689, 60, 61, 202, -50, 68);
+shipSpriteSheet.createSprite('propeller_blur_1', 339, 60, 61, 202, -10, 68);
+shipSpriteSheet.createSprite('propeller_blur_2', 419, 58, 61, 202, -10, 68);
 shipSpriteSheet.createSprite('bit_screw', 640, 528, 12, 12);
 shipSpriteSheet.createSprite('bit_plate', 665, 525, 13, 16);
 shipSpriteSheet.createSprite('bit_brick', 688, 523, 18, 15);

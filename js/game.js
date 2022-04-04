@@ -338,7 +338,7 @@ class HullModule extends ShipModule {
     sideHullSprite = shipSpriteSheet.sprites.side_hull;
 
     renderTopHull = false;
-    renderRightHull = false;
+    renderLeftHull = false;
 
     floodAmount = 0;
     buoyancy = 20;
@@ -430,7 +430,7 @@ class HullModule extends ShipModule {
             }
         }
 
-        if (this.renderRightHull) {
+        if (this.renderLeftHull) {
             if (this.sideHullSprite) {
                 this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
@@ -449,7 +449,7 @@ class HullModule extends ShipModule {
     updateDisplay() {
         const moduleAbove = this.ship.getModule(this.x, this.y + 1);
         this.renderTopHull = moduleAbove && moduleAbove.solid;
-        this.renderRightHull = !!this.ship.getModule(this.x + 1, this.y, HullModule);
+        this.renderLeftHull = !!this.ship.getModule(this.x - 1, this.y, HullModule);
     }
 }
 
@@ -694,13 +694,13 @@ class PropellerModule extends ShipModule {
     }
 
     static canBuildAt(modX, modY) {
-        const moduleRight = state.ship.getModule(modX + 1, modY);
-        return moduleRight && moduleRight.constructor.name == 'BoilerModule';
+        const moduleLeft = state.ship.getModule(modX - 1, modY);
+        return moduleLeft && moduleLeft.constructor.name == 'BoilerModule';
     }
 
     get isSpinning() {
-        const boilerModule = state.ship.getModule(this.x + 1, this.y);
-        return boilerModule.isGeneratingSteam;
+        const boilerModule = state.ship.getModule(this.x - 1, this.y);
+        return boilerModule && boilerModule.isGeneratingSteam;
     }
 
     getStats() {
@@ -752,8 +752,8 @@ class FinSailModule extends ShipModule {
     }
 
     static canBuildAt(modX, modY) {
-        const moduleLeft = state.ship.getModule(modX - 1, modY);
-        return moduleLeft && moduleLeft.solid;
+        const moduleRight = state.ship.getModule(modX + 1, modY);
+        return moduleRight && moduleRight.solid;
     }
 
     getStats() {
@@ -808,8 +808,7 @@ class Ship extends Entity {
         let y = this.rows;
         while (y-->0) {
             const row = this.modules[y];
-            let x = this.columns;
-            while (x-->0) {
+            for (let x = 0; x < this.columns; x++) {
                 const translateX = box.x + (x * SHIP_MODULE_WIDTH);
                 const translateY = box.y + (y * -SHIP_MODULE_HEIGHT);
 
