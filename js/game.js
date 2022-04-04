@@ -427,6 +427,9 @@ class HullModule extends ShipModule {
         this.sprite = this.state !== 'normal' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
+        // don't show indicator overlays during game over screen
+        if (!this.ship.updating) return;
+
         if (this.renderTopHull) {
             if (this.topHullSprite) {
                 this.topHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
