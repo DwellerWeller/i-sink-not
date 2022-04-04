@@ -537,20 +537,22 @@ class HullModule extends ShipModule {
                 this.topHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
         }
-
-        if (this.renderLeftHull) {
-            if (this.sideHullSprite) {
-                this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
-            }
-        }
-
+        
         // don't show indicator overlays during game over screen
         if (!this.ship.updating || !state.gameRunning) return;
-
+        
         if (this.floodAmount > 0) {
             ctx.fillStyle = 'rgba(0, 0, 255, .5)';
             const percentFlooded = this.floodAmount / this.buoyancy;
             ctx.fillRect(0, Math.ceil(-SHIP_MODULE_HEIGHT * percentFlooded), SHIP_MODULE_WIDTH, Math.ceil(SHIP_MODULE_HEIGHT * percentFlooded));
+        }
+    }
+    
+    renderLate() {
+        if (this.renderLeftHull) {
+            if (this.sideHullSprite) {
+                this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+            }
         }
     }
 
@@ -968,6 +970,22 @@ class Ship extends Entity {
                     ctx.fillText(`${module.damage.toFixed(2)}`, 0, -SHIP_MODULE_HEIGHT);
                 }
                 ctx.translate(-translateX, -translateY);
+            }
+        }
+
+        y = this.rows;
+        while (y-->0) {
+            const row = this.modules[y];
+            if (!row) continue;
+            for (let x = 0; x < this.columns; x++) {
+                const shipModule = row[x];
+                if (!shipModule || !shipModule.renderLate) continue;
+
+                const { globalX, globalY } = shipModule;
+                ctx.translate(globalX, globalY);
+                
+                shipModule.renderLate();
+                ctx.translate(-globalX, -globalY);
             }
         }
 
