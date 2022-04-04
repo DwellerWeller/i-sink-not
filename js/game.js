@@ -155,11 +155,13 @@ function onClick(ev) {
     const x = ev.offsetX;
     const y = ev.offsetY;
 
+
     for (let entity of entities) {
         if (isEntityInteractive(entity)) {
             let res = entity.checkClick(x, y);
             if (res) {
                 res.onClick(x, y);
+                ev.stopPropagation();
                 return;
             }
         }
@@ -521,7 +523,8 @@ class NullModule extends ShipModule {
         menuEl.appendChild(headerEl);
 
         menuEl.id = 'module-menu';
-        menuEl.onclick = (ev) => {
+
+        const clickHandler = (ev) => {
             if (ev.target.moduleType) {
                 sound.play('building');
                 this.ship.addModule(this.x, this.y, ConstructionModule);
@@ -529,15 +532,15 @@ class NullModule extends ShipModule {
                 state.doPlayerAction(1000, () => {
                     this.ship.addModule(this.x, this.y, ev.target.moduleType);
                 });
-            } else if (ev.target.id != 'cancel') {
-                return;
             } else if (ev.target.id == 'cancel') {
                 sound.play('cancel');
             }
 
             menuEl.remove();
+            document.body.removeEventListener('click', clickHandler);
             state.paused = false;
         };
+        document.body.addEventListener('click', clickHandler);
 
         for (const moduleType of this.buildOptions) {
             const moduleEl = document.createElement('button');
