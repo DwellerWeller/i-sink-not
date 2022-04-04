@@ -266,7 +266,7 @@ class GameController extends Entity {
 
         // distance
         ctx.fillStyle = 'white';
-        ctx.font = '32px sans-serif';
+        ctx.font = `32px ${FONT_STACK}`;
 
         const textMargin = 10;
 
@@ -280,6 +280,13 @@ class GameController extends Entity {
         const timeTextMetrics = ctx.measureText(timeText);
         ctx.fillText(timeText, textMargin, timeTextMetrics.actualBoundingBoxAscent + textMargin);
 
+        // pause
+        if (state.gameRunning && state.paused) {
+            ctx.font = `64px ${FONT_STACK}`;
+            const pauseText = 'PAUSED';
+            const pauseTextMetrics = ctx.measureText(pauseText);
+            ctx.fillText(pauseText, CANVAS_WIDTH/2 - pauseTextMetrics.width/2, 200);
+        }
     }
 }
 
