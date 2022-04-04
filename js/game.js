@@ -331,7 +331,7 @@ class HullModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.hull;
 
     static moduleName = 'Hull';
-    static description = 'It makes you float';
+    static description = 'Makes you float';
 
     sprite = HullModule.sprite;
 
@@ -796,6 +796,9 @@ class FinSailModule extends ShipModule {
 
 class CastleModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.castle;
+
+    static moduleName = 'Castle';
+    static description = 'Looks really cool';
     
     weight = 20;
 

@@ -42,6 +42,7 @@ body {
     margin: 1em;
     text-align: left;
     height: 100px;
+    padding-right: 1em;
 }
 
 #module-menu button * {
