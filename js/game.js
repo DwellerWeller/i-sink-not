@@ -413,6 +413,7 @@ class HullModule extends ShipModule {
                 this.state = 'normal';
             });
         } else if (this.floodAmount > 0) {
+            sound.bucket.play();
             state.doPlayerAction(1000, () => {
                 this.floodAmount = Math.max(0, this.floodAmount-10);
             });
@@ -1110,7 +1111,6 @@ class TitleScreen extends Entity {
                     clearInterval(fadeAudio);
                     setTimeout(function () {
                         var loop = new seamless.SeamlessLoop();
-                        //loop.addUri('sound/i sink not - song 2.mp3', 13000, "theme_song");
                         loop.addUri('sound/i sink not - song 2.mp3', 122594, "theme_song");
                         loop.callback(function () {
                             loop.start("theme_song");
