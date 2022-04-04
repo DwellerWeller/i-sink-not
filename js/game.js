@@ -49,8 +49,8 @@ class Entity {
     zIndex = 0;
     canClickWhilePaused = false;
 
-    render(timeSinceLastTick) {}
-    tick(now) {}
+    render(now) {}
+    tick(timeSinceLastTick, now) {}
     // return *entity reference* if this entity should be "clicked" at position x, y
     checkClick(x, y) { return null; }
     // callback for when this entity is clicked
@@ -390,14 +390,14 @@ class ShipModule extends Entity {
     tick(timeSinceLastTick) {
         this.icon = null;
 
-        if (this.percentSubmerged > 0 && Math.random() < (state.speed / 10)) {
+        if (this.percentSubmerged > 0 && Math.random() < (timeSinceLastTick * state.speed / 1000)) {
             const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
             const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
             emitParticle(SprayParticle, 600, spriteX, spriteY);
         }
 
         if (this.fragility != 0) {
-            if (Math.random() < .05) {
+            if (Math.random() < timeSinceLastTick * .0005) {
                 const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/50) * Math.random();
                 this.damage = Math.min(this.health, this.damage + boost);
             }
@@ -749,7 +749,7 @@ class BoilerModule extends ShipModule {
 
         super.tick(timeSinceLastTick, now);
             
-        if (this.isGeneratingSteam && Math.random() < .5) {
+        if (this.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
             // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
             emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
         }
@@ -819,8 +819,8 @@ class PropellerModule extends ShipModule {
         }
     }
 
-    tick() {
-        if (this.isSpinning && Math.random() < .5) {
+    tick(timeSinceLastTick) {
+        if (this.isSpinning && Math.random() < timeSinceLastTick / 200) {
             emitParticle(WindParticle, 1000, this.globalX - 80, this.globalY - (SHIP_MODULE_HEIGHT * 1.5 * Math.random()) - 30);
         }
     }
@@ -906,11 +906,11 @@ class SmokeStackModule extends ShipModule {
         return mod && mod.solid;
     }
 
-    tick() {
+    tick(timeSinceLastTick) {
         super.tick();
 
         const boiler = this.ship.getModule(this.x, this.y - 1, BoilerModule);
-        if (boiler && boiler.isGeneratingSteam && Math.random() < .5) {
+        if (boiler && boiler.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
             emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
         }
     }
@@ -1567,7 +1567,7 @@ export function setUp(canvasEl_) {
 
     const now = performance.now();
     previousTick = now;
-    tickTimer = setInterval(tick, 100);
+    tickTimer = setInterval(tick, 33);
 
     firstFrame = now;
     previousFrame = firstFrame;
