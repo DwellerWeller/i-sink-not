@@ -634,6 +634,7 @@ class SailModule extends ShipModule {
 
 class BoilerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.boiler;
+    static windowSprite = shipSpriteSheet.sprites.boiler_lit_window;
 
     static moduleName = 'Boiler';
     static description = 'Provides steam for propellors and balloons';
@@ -661,7 +662,8 @@ class BoilerModule extends ShipModule {
             
         if (this.state == 'normal') {
             if (this.isGeneratingSteam && Math.random() < .5) {
-                emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+                // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+                emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
             }
 
             if (Math.random() < (state.difficultyCoefficient * 0.005)) {
@@ -700,7 +702,13 @@ class BoilerModule extends ShipModule {
     }
 
     render() {
-        super.render();
+        if (this.isGeneratingSteam) {
+            let bob = getWaterBob(0, 0.5, 32);
+            BoilerModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
+            BoilerModule.windowSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
+        } else {
+            super.render();
+        }
 
         if (this.state == 'exploded') {
             ctx.fillStyle = 'rgba(255, 0, 0, .2)';
