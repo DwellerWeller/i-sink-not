@@ -1303,7 +1303,7 @@ export function setUp(canvasEl_) {
 
     entities.push(ship);
 
-    const foregroundWater = new Water(0, .9, .15, -150);
+    const foregroundWater = new Water(0, .5, .15, -150);
     foregroundWater.zIndex = 100;
     entities.push(foregroundWater);
 
