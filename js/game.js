@@ -1405,6 +1405,7 @@ class GameOverScreen extends Entity {
 
         ctx.font = `36pt ${FONT_STACK}`;
         ctx.fillStyle = '#242738';
+        ctx.textAlign = 'left';
 
         let yPos = 100;
         const margin = 10;
