@@ -398,11 +398,9 @@ class ShipModule extends Entity {
     }
 
     onMouseOver() {
-        if (this.damageLevel == 'broken') {
+        if (this.damage > 0) {
             canvasEl.style.cursor = 'pointer'; // TODO: wrench
-            return true;
         }
-        return false;
     }
 
     onMouseOut() {
@@ -410,7 +408,7 @@ class ShipModule extends Entity {
     }
 
     onClick(x, y) {
-        if (this.damageLevel == 'broken') {
+        if (this.damage > 0) {
             this.onStartFix();
             this.isBeingRepaired = true;
             state.doPlayerAction(1000, () => {
@@ -936,6 +934,7 @@ class Ship extends Entity {
                     module.render(now);
                 }
                 if (state.debug) {
+                    ctx.font = `24pt ${FONT_STACK}`;
                     ctx.fillStyle = 'white';
                     ctx.fillText(`${module.damage.toFixed(2)}`, 0, -SHIP_MODULE_HEIGHT);
                 }
