@@ -276,10 +276,14 @@ const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
-    solid = true;
-    sprite = null;
-
+    static solid = true;
     static canBuildAt(x, y) { return true; }
+
+    get solid() {
+        return this.constructor.solid;
+    }
+
+    sprite = null;
 
     constructor(ship, x, y) {
         super();
@@ -355,17 +359,13 @@ class HullModule extends ShipModule {
     static canBuildAt(modX, modY) {
         // we can only be built on top of other hull modules (or at the bottom)
         if (modY == 0) {
-            if (modX > 0) {
-                if (state.ship.getModule(modX-1, modY).solid)
-                    return true;
-            }
+            const left = state.ship.getModule(modX - 1, modY);
+            if (left && left.solid) return true;
 
-            if (modX < state.ship.columns-1) {
-                if (state.ship.getModule(modX+1, modY).solid)
-                    return true;
-            }
+            const right = state.ship.getModule(modX + 1, modY);
+            if (right && right.solid) return true;
 
-            return false;
+            return true;
         }
 
         const moduleBelow = state.ship.getModule(modX, modY - 1);
@@ -459,9 +459,9 @@ class HullModule extends ShipModule {
 class NullModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.square_bg;
     static outlineSprite = shipSpriteSheet.sprites.square_outline;
+    static solid = false;
     
     showOutline = false;
-    solid = false;
 
     constructor(ship, x, y) {
         super(ship, x, y);
@@ -475,7 +475,7 @@ class NullModule extends ShipModule {
     onMouseOver() {
         const buildOptions = [];
         for (const moduleType of moduleTypes) {
-            if (moduleType.canBuildAt(this.x, this.y)) {
+            if (this.ship.canBuildModule(this.x, this.y, moduleType)) {
                 buildOptions.push(moduleType);
             }
         }
@@ -577,16 +577,14 @@ class NullModule extends ShipModule {
 
 class ConstructionModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.scaffolding;
-    solid = false;
+    static solid = false;
 }
 
 class SailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.sail;
-
     static moduleName = 'Sail';
     static description = 'Makes you go';
-
-    solid = false;
+    static solid = false;
 
     get weight() {
         return 1.5;
@@ -627,7 +625,7 @@ class BoilerModule extends ShipModule {
         return 10;
     }
 
-    static canBuildAt(modX, modY) {
+    static canBuildAt(modX, modY) { 
         const moduleBelow = state.ship.getModule(modX, modY - 1);
         return moduleBelow && moduleBelow.solid;
     }
@@ -694,9 +692,9 @@ class BoilerModule extends ShipModule {
 
 class PropellerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.propeller;
-
     static moduleName = 'Propellor';
     static description = 'Makes you go <i>fast</i>. Must be attached to a functioning boiler';
+    static solid = false;
 
     static blurSprites = [
         shipSpriteSheet.sprites.propeller_blur_1,
@@ -705,7 +703,6 @@ class PropellerModule extends ShipModule {
 
     blurSprite = new AnimatedSpriteController(PropellerModule.blurSprites, performance.now());
 
-    solid = false;
 
     get weight() {
         return 2;
@@ -741,8 +738,8 @@ class BalloonModule extends ShipModule {
 
     static moduleName = 'Balloon';
     static description = 'Makes you go <i>up</i>. Must be attached to a functioning boiler'
+    static solid = false;
 
-    solid = false;
 
     get isInflated() {
         const moduleBelow = this.ship.getModule(this.x, this.y - 1);
@@ -768,8 +765,7 @@ class BalloonModule extends ShipModule {
 
 class FinSailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.fin_sail;
-    solid = false;
-
+    static solid = false;
     static moduleName = 'Fin sail';
     static description = 'Makes you go';
 
@@ -807,7 +803,7 @@ const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinS
 
 
 class Ship extends Entity {
-    columns = 4;
+    columns = 5;
     rows = 1;
 
     modules = [];
@@ -906,6 +902,14 @@ class Ship extends Entity {
             }
         }
         return stats;
+    }
+
+    canBuildModule(x, y, ModuleClass) {
+        if (ModuleClass.solid && (x === 0 || x === this.columns - 1)) {
+            return false;
+        }
+        const res =  ModuleClass.canBuildAt(x, y);
+        return res;
     }
 
     addModule(x, y, ModuleClass) {
