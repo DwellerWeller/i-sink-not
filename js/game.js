@@ -841,11 +841,6 @@ class Ship extends Entity {
 
     tick(timeSinceLastTick, now) {
         for (const [modY, row] of this.modules.entries()) {
-            // underwater modules don't tick
-            if ((modY+1) * SHIP_MODULE_HEIGHT < state.shipDraught) {
-                continue;
-            }
-
             for (const module of row) {
                 if (module) {
                     module.tick(timeSinceLastTick, now);
