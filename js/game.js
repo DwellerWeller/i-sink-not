@@ -1387,6 +1387,68 @@ class TitleScreen extends Entity {
     }
 }
 
+class Fish extends Entity {
+    static sprite = shipSpriteSheet.sprites.bit_fish;
+
+    constructor() {
+        super();
+
+        this.depth = CANVAS_HEIGHT + currentWaterHeight + Fish.sprite.height;
+
+        const direction = Math.random() < .5 ? -1 : 1; 
+        this.speed = direction * (2 * Math.random() + 2);
+        this.x = direction < 0 ? CANVAS_WIDTH + Fish.sprite.width : -Fish.sprite.width;
+    }
+
+    tick(deltaT) {
+        if (this.depth - currentWaterHeight < Fish.sprite.height) {
+            this.alive = false;
+        } else if (this.x < -Fish.sprite.width || this.x > CANVAS_WIDTH + Fish.sprite.width) {
+            this.alive = false;
+        }
+    }
+
+    render(now) {
+        const deltaT = now - previousFrame;
+        this.x += this.speed * deltaT/100;
+
+        if (this.speed > 0) {
+            ctx.save();
+            ctx.scale(-1, 1);
+            Fish.sprite.draw(ctx, -this.x, this.depth - currentWaterHeight);
+            ctx.restore();
+        } else {
+            Fish.sprite.draw(ctx, this.x, this.depth - currentWaterHeight);
+        }
+    }
+
+}
+
+class Bubble extends Entity {
+    static sprite = shipSpriteSheet.sprites.bit_bubble;
+
+    constructor() {
+        super();
+
+        this.depth = CANVAS_HEIGHT + currentWaterHeight + Bubble.sprite.height;
+        this.x = Math.random() * CANVAS_WIDTH;
+    }
+
+    tick(deltaT) {
+        if (this.depth - currentWaterHeight < Bubble.sprite.height) {
+            this.alive = false;
+        }
+    }
+
+    render(now) {
+        const deltaT = now - previousFrame;
+        this.depth -= deltaT/10;
+
+        Bubble.sprite.draw(ctx, this.x, this.depth - currentWaterHeight);
+    }
+
+}
+
 class GameOverScreen extends Entity {
     zIndex = 1000;
     canClickWhilePaused = true;
@@ -1394,10 +1456,26 @@ class GameOverScreen extends Entity {
     constructor(timeElapsed) {
         super();
         this.timeElapsed = timeElapsed;
+        this.fishCountdown = 2 * 1000;
+        this.bubbleCountdown = 3 * 1000;
         state.cooldown = 0;
     }
 
     checkClick(x, y) { return this; }
+
+    tick(deltaT, now) {
+        this.fishCountdown -= deltaT;
+        if (this.fishCountdown < 0) {
+            entities.push(new Fish());
+            this.fishCountdown = Math.random() * 1000 * 2;
+        }
+
+        this.bubbleCountdown -= deltaT;
+        if (this.bubbleCountdown < 0) {
+            entities.push(new Bubble());
+            this.bubbleCountdown = Math.random() * 1000 * 2;
+        }
+    }
 
     render(now) {
         const timeSinceLastFrame = now - previousFrame;
