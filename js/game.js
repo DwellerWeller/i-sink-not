@@ -40,6 +40,7 @@ const cloneVector = ({ x, y }) => ({ x, y });
 
 const VECTOR_UP = { x: 0, y: -1 };
 const VECTOR_DOWN = { x: 0, y: 1 };
+const VECTOR_LEFT = { x: -1, y: 1 };
 
 class Entity {
     visible = true;
@@ -793,6 +794,12 @@ class PropellerModule extends ShipModule {
             this.blurSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
     }
+
+    tick() {
+        if (this.isSpinning && Math.random() < .5) {
+            emitParticle(WindParticle, 1000, this.globalX - 80, this.globalY - (SHIP_MODULE_HEIGHT * 1.5 * Math.random()) - 30);
+        }
+    }
 }
 
 class BalloonModule extends ShipModule {
@@ -1143,12 +1150,14 @@ class Particle extends Entity {
         const move = scaleVector(this.direction, this.speed);
         addVectors(this, move);
 
-        this.direction = normalizeVector(
-            addVectors(
-                this.direction,
-                this.forceVector,
-            ),
-        );
+        if (this.forceVector) {
+            this.direction = normalizeVector(
+                addVectors(
+                    this.direction,
+                    this.forceVector,
+                ),
+            );
+        }
     }
 
     render(t) {
@@ -1193,6 +1202,26 @@ class SprayParticle extends Particle {
         x: -Math.random(),
         y: -1,
     });
+}
+
+class WindParticle extends Particle {
+    static sprites = [
+        shipSpriteSheet.sprites.wind_1,
+        shipSpriteSheet.sprites.wind_2,
+        shipSpriteSheet.sprites.wind_3,
+        shipSpriteSheet.sprites.wind_4,
+    ];
+
+    sprite = new AnimatedSpriteController(WindParticle.sprites, performance.now());
+
+    forceVector = null;
+    direction = cloneVector(VECTOR_LEFT);
+    speed = 1;
+
+    tick(deltaT, t) {
+        super.tick(deltaT, t);
+        this.x -= state.speed;
+    }
 }
 
 let previousTick;
