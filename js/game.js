@@ -390,9 +390,12 @@ class HullModule extends ShipModule {
         super.tick(timeSinceLastTick, now);
 
         if (this.state == 'normal') {
-            if (Math.random() < (state.difficultyCoefficient * 0.005)) {
-                sound.play('breaking');
-                this.state = 'leaking';
+            // it really could break deep underwater, but we'll be nice to the player here
+            if (this.percentSubmerged < 1) {
+                if (Math.random() < (state.difficultyCoefficient * 0.005)) {
+                    sound.play('breaking');
+                    this.state = 'leaking';
+                }
             }
         } else {
             this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 2);
