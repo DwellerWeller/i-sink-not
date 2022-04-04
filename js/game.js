@@ -428,7 +428,7 @@ class ShipModule extends Entity {
         }
 
         // don't show indicator overlays during game over screen
-        if (!this.ship.updating) return;
+        if (!this.ship.updating || !state.gameRunning) return;
 
         if (this.fragility > 0) {
             if (this.damageLevel == 'damaged') {
@@ -527,7 +527,7 @@ class HullModule extends ShipModule {
         }
 
         // don't show indicator overlays during game over screen
-        if (!this.ship.updating) return;
+        if (!this.ship.updating || !state.gameRunning) return;
 
         if (this.floodAmount > 0) {
             ctx.fillStyle = 'rgba(0, 0, 255, .5)';
