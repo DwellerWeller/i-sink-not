@@ -535,7 +535,7 @@ class HullModule extends ShipModule {
         super.tick(timeSinceLastTick, now);
 
         if (this.damageLevel == 'broken') {
-            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 2);
+            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 3);
         }
     }
 
