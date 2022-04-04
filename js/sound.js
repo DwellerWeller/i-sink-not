@@ -4,6 +4,9 @@ building.volume = 0.70;
 export var repairing  = new Audio('sound/repairing.mp3');
 repairing.volume = 0.70;
 
+export var repairing  = new Audio('sound/repairing.mp3');
+>>>>>>> parent of 1c153d6... Attempt to seamlessly loop the main song.
+
 export var breaking  = new Audio('sound/breaking.mp3');
 breaking.volume = 0.70;
 
