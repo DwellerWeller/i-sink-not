@@ -627,7 +627,7 @@ class NullModule extends ShipModule {
                 state.doPlayerAction(1000, () => {
                     this.ship.addModule(this.x, this.y, ev.target.moduleType);
                 });
-            } else if (ev.target.id == 'cancel') {
+            } else {
                 sound.play('cancel');
             }
 
