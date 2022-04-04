@@ -765,7 +765,18 @@ class FinSailModule extends ShipModule {
     }
 }
 
-const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule];
+class CastleModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.castle;
+    
+    weight = 20;
+
+    static canBuildAt(modX, modY) {
+        const mod = state.ship.getModule(modX, modY - 1);
+        return mod && mod.solid;
+    }
+}
+
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule];
 
 
 class Ship extends Entity {
