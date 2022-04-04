@@ -1580,7 +1580,7 @@ export function setUp(canvasEl_) {
     entities.push(new TitleScreen());
 
     document.addEventListener('keydown', ev => {
-        if (ev.code == 'Space') {
+        if (ev.code == 'Space' || ev.code == 'KeyP') {
             state.paused = !state.paused;
         } else if (ev.code == 'KeyD') {
             state.debug = !state.debug;
