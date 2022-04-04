@@ -34,9 +34,9 @@ theme_song.addEventListener('timeupdate', function(){
 
 export var main_song = new Audio('sound/i sink not - song 2.mp3');
 main_song.addEventListener('timeupdate', function(){
-    var buffer = .44;
+    var buffer = .1;
     if(this.currentTime > this.duration - buffer){
-        this.currentTime = 7.211;
+        this.currentTime = 0;
         this.play();
     }
 });
