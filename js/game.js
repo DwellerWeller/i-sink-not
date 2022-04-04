@@ -122,59 +122,6 @@ function getWaterBob(offset = 0, magnitude = 5) {
 
 const isPointInBox = (x, y, box) => !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
 
-class Button extends Entity {
-    static SIZE = 50;
-    static MARGIN = 20;
-
-    constructor(index, icon, cost, startCallback, endCallback) {
-        super();
-        this.icon = icon;
-        this.cost = cost;
-        this.startCallback = startCallback;
-        this.endCallback = endCallback;
-        this.hovered = false;
-
-        this.box = {
-            x: Button.MARGIN,
-            y: Button.MARGIN + index * (Button.SIZE + Button.MARGIN),
-            height: Button.SIZE,
-            width: Button.SIZE,
-        };
-    }
-
-    checkClick(x, y) {
-        const { box } = this;
-        if (isPointInBox(x, y, box)) {
-            return this;
-        }
-    }
-
-    onClick(x, y) {
-        state.cooldown = this.cost;
-        state.currentCallback = this.endCallback;
-
-        if (this.startCallback)
-            this.startCallback();
-    }
-
-    onMouseOver() {
-        this.hovered = true;
-        canvasEl.style.cursor = 'pointer';
-    }
-
-    onMouseOut() {
-        this.hovered = false;
-        canvasEl.style.cursor = 'default';
-    }
-
-    render() {
-        const { x, y, width, height } = this.box;
-        ctx.fillStyle = state.cooldown > 0 ? 'grey' : this.hovered ? 'white' : 'cornsilk';
-        ctx.fillRect(x, y, width, height);
-        ctx.strokeText(this.icon, x + 10, y + 36);
-    }
-}
-
 /**************/
 
 function isEntityInteractive(entity) {
@@ -1159,11 +1106,6 @@ class TitleScreen extends Entity {
         state.ship.updating = true;
 
         entities.push(new DebugDisplay());
-        entities.push(
-            new Button(0, '🐛', 1, () => {
-                state.debug = !state.debug;
-            }),
-        );
     }
 
     render(now) {
@@ -1257,10 +1199,10 @@ export function setUp(canvasEl_) {
     entities.push(new TitleScreen());
 
     document.addEventListener('keydown', ev => {
-        if (state.debug) {
-            if (ev.code == 'Space') {
-                state.paused = !state.paused;
-            }
+        if (ev.code == 'Space') {
+            state.paused = !state.paused;
+        } else if (ev.code == 'KeyD') {
+            state.debug = !state.debug;
         }
     });
 
