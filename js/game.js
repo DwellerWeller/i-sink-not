@@ -491,8 +491,6 @@ class NullModule extends ShipModule {
         if (this.buildOptions.length > 0) {
             canvasEl.style.cursor = 'pointer';
             this.showOutline = true;
-        } else {
-            canvasEl.style.cursor = 'not-allowed';
         }
     }
 
