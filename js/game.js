@@ -108,6 +108,12 @@ class State {
         return height;
     }
 
+    doPlayerAction(delay, callback) {
+        this.cooldown = delay;
+        this.currentCallback = callback;
+        canvasEl.style.cursor = 'wait';
+    }
+
     triggerSyntheticMouseMove() {
         onMouseMove(new MouseEvent('mousemove', {offsetX: this.currentMouseX, offsetY: this.currentMouseY}));
     }
@@ -218,8 +224,10 @@ class GameController extends Entity {
         state.cooldown = Math.max(0, state.cooldown - timeSinceLastTick);
         if (state.cooldown == 0 && state.currentCallback) {
             state.currentCallback();
-            state.triggerSyntheticMouseMove();
             state.currentCallback = null;
+
+            canvasEl.style.cursor = 'default';
+            state.triggerSyntheticMouseMove();
         }
 
         const stats = state.ship.getStats();
@@ -400,15 +408,13 @@ class HullModule extends ShipModule {
             sound.repairing.play();
             this.state = 'repairing';
 
-            state.cooldown = 1000;
-            state.currentCallback = () => {
+            state.doPlayerAction(1000, () => {
                 this.state = 'normal';
-            };
+            });
         } else if (this.floodAmount > 0) {
-            state.cooldown = 1000;
-            state.currentCallback = () => {
+            state.doPlayerAction(1000, () => {
                 this.floodAmount = Math.max(0, this.floodAmount-10);
-            }
+            });
         }
     }
 
@@ -487,11 +493,11 @@ class NullModule extends ShipModule {
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
                 sound.building.play();
-                state.cooldown = 1000;
                 this.ship.addModule(this.x, this.y, ConstructionModule);
-                state.currentCallback = () => {
+
+                state.doPlayerAction(1000, () => {
                     this.ship.addModule(this.x, this.y, ev.target.moduleType);
-                };
+                });
             } else if (ev.target.id != 'cancel') {
                 return;
             } else if (ev.target.id == 'cancel') {
@@ -650,10 +656,9 @@ class BoilerModule extends ShipModule {
             sound.repairing.play();
             this.state = 'repairing';
 
-            state.cooldown = 1000;
-            state.currentCallback = () => {
+            state.doPlayerAction(1000, () => {
                 this.state = 'normal';
-            };
+            });
         }
     }
 
