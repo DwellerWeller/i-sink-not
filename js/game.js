@@ -266,24 +266,42 @@ class GameController extends Entity {
         if (!state.ship.updating) return;
         if (!state.gameRunning) return;
 
-        // distance
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = 'black';
         ctx.font = `32px ${FONT_STACK}`;
-
+        ctx.textAlign = 'right';
         const textMargin = 10;
-
+        
+        
+        
+        // distance
+        let verticalOffset = textMargin;
+        const distanceIcon = shipSpriteSheet.sprites.oar_icon;
+        distanceIcon.draw(ctx, CANVAS_WIDTH - (distanceIcon.width/2 + textMargin), distanceIcon.height/2 + verticalOffset);
         const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
-        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - textMetrics.width) - textMargin, Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin);
-
+        ctx.fillText(distanceText, Math.floor(CANVAS_WIDTH - (distanceIcon.width + textMargin*2)) - textMargin, Math.floor(textMetrics.actualBoundingBoxAscent) + verticalOffset + 25);
+        verticalOffset += distanceIcon.height + textMargin;
+        
         // time
+        const timeIcon = shipSpriteSheet.sprites.watch_icon;
+        timeIcon.draw(ctx, CANVAS_WIDTH - (timeIcon.width/2 + textMargin), timeIcon.height/2 + verticalOffset);
         const secondsAfloat = Math.floor(state.timeAfloat / 1000);
         const timeText = `${secondsAfloat}s`;
         const timeTextMetrics = ctx.measureText(timeText);
-        ctx.fillText(timeText, textMargin, timeTextMetrics.actualBoundingBoxAscent + textMargin);
+        ctx.fillText(timeText, Math.floor(CANVAS_WIDTH - (timeIcon.width + textMargin*2)), timeTextMetrics.actualBoundingBoxAscent + verticalOffset + 25);
+        verticalOffset += timeIcon.height + textMargin;
+        
+        // modules
+        const buildIcon = shipSpriteSheet.sprites.hammer_icon;
+        buildIcon.draw(ctx, CANVAS_WIDTH - (buildIcon.width/2 + textMargin), buildIcon.height/2 + verticalOffset);
+        const buildText = state.ship.moduleCount;
+        const buildTextMetrics = ctx.measureText(buildText);
+        ctx.fillText(buildText, Math.floor(CANVAS_WIDTH - (buildIcon.width + textMargin*2)), buildTextMetrics.actualBoundingBoxAscent + verticalOffset + 35);
+
 
         // pause
         if (state.gameRunning && state.paused) {
+            ctx.textAlign = 'center';
             ctx.font = `64px ${FONT_STACK}`;
             const pauseText = 'PAUSED';
             const pauseTextMetrics = ctx.measureText(pauseText);
