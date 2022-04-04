@@ -77,7 +77,6 @@ class State {
     bgDistanceTraveled = 0;
 
     speed = 0;
-    speedBoost = 0;
     cooldown = 0;
     currentCallback = null;
     timeElapsed = 0;
@@ -202,7 +201,7 @@ function drawParallax(img, speed, x_offset, y_offset) {
     }
     ctx.restore();
     const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
-    state.bgDistanceTraveled += timeSinceLastFrame * ((state.speed + state.speedBoost) / 1000);
+    state.bgDistanceTraveled += timeSinceLastFrame * (state.speed / 1000);
 }
 
 class GameController extends Entity {
@@ -235,7 +234,7 @@ class GameController extends Entity {
         state.speed = stats.speed || 0;
 
         state.timeAfloat += timeSinceLastTick;
-        state.distanceTraveled += timeSinceLastTick/100 * (state.speed + state.speedBoost);
+        state.distanceTraveled += timeSinceLastTick/100 * state.speed;
         state.shipDraught += timeSinceLastTick/100 * (stats.weight - (stats.buoyancy || 0));
     }
 
