@@ -628,8 +628,8 @@ class BoilerModule extends ShipModule {
     }
 
     static canBuildAt(modX, modY) {
-        if (modX == 0) {
-            // don't allow building at the back where there's no room for a propellor
+        if (modX == state.ship.columns-1) {
+            // don't allow building at the front where there's no room for a propellor
             return false;
         }
 
