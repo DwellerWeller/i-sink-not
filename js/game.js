@@ -512,20 +512,17 @@ class HullModule extends ShipModule {
         this.updateDisplay();
     }
 
-    static canBuildAt(modX, modY) {
-        // we can only be built on top of other hull modules (or at the bottom)
-        if (modY == 0) {
-            const left = state.ship.getModule(modX - 1, modY);
-            if (left && left.solid) return true;
-
-            const right = state.ship.getModule(modX + 1, modY);
-            if (right && right.solid) return true;
-
-            return false;
-        }
-
+    static canBuildAt(modX, modY) {        
         const moduleBelow = state.ship.getModule(modX, modY - 1);
-        return moduleBelow && moduleBelow.solid;
+        if (moduleBelow && moduleBelow.solid) return true;
+        
+        const left = state.ship.getModule(modX - 1, modY, HullModule);
+        if (left && left.solid) return true;
+
+        const right = state.ship.getModule(modX + 1, modY, HullModule);
+        if (right && right.solid) return true;
+
+        return false;
     }
 
     tick(timeSinceLastTick, now) {
@@ -875,7 +872,9 @@ class BalloonModule extends ShipModule {
 
     render() {
         BalloonModule.baseSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
-        // TODO should animate up and down
+    }
+    
+    renderLate() {
         const inflationOffset = this.isInflated ? getWaterBob(0, 3, 400) : 48;
         BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
@@ -1264,7 +1263,7 @@ class BoilerSteamParticle extends SteamParticle {
 class SprayParticle extends Particle {
     sprite = shipSpriteSheet.sprites.water_spray;
     forceVector = VECTOR_DOWN;
-    speed = 10;
+    speed = 5;
 
     direction = normalizeVector({
         x: -Math.random(),
