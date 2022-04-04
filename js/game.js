@@ -1421,6 +1421,7 @@ class TitleScreen extends Entity {
 }
 
 class Fish extends Entity {
+    zIndex = 2000;
     static sprite = shipSpriteSheet.sprites.bit_fish;
 
     constructor() {
@@ -1458,6 +1459,7 @@ class Fish extends Entity {
 }
 
 class Bubble extends Entity {
+    zIndex = 2000;
     static sprite = shipSpriteSheet.sprites.bit_bubble;
 
     constructor() {
