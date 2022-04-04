@@ -462,25 +462,29 @@ class NullModule extends ShipModule {
     static solid = false;
     
     showOutline = false;
+    showBackground = false;
+    buildOptions = [];
 
     constructor(ship, x, y) {
         super(ship, x, y);
-        this.buildOptions = [];
+        this.updateDisplay();
     }
 
     get weight() {
         return 0;
     }
 
-    onMouseOver() {
-        const buildOptions = [];
+    updateDisplay() {
+        this.buildOptions.length = 0;
         for (const moduleType of moduleTypes) {
             if (this.ship.canBuildModule(this.x, this.y, moduleType)) {
-                buildOptions.push(moduleType);
+                this.buildOptions.push(moduleType);
             }
         }
-        this.buildOptions = buildOptions;
+        this.showBackground = this.buildOptions.length > 0;
+    }
 
+    onMouseOver() {
         if (this.buildOptions.length > 0) {
             canvasEl.style.cursor = 'pointer';
             this.showOutline = true;
@@ -490,7 +494,6 @@ class NullModule extends ShipModule {
     }
 
     onMouseOut() {
-        this.buildOptions = [];
         canvasEl.style.cursor = 'default';
         this.showOutline = false;
     }
@@ -559,6 +562,7 @@ class NullModule extends ShipModule {
 
     render() {
         if (!state.ship.updating) return;
+        if (!this.showBackground) return;
 
         super.render();
 
