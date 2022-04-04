@@ -1199,6 +1199,7 @@ class Particle extends Entity {
     forceVector = VECTOR_UP;
     direction = cloneVector(VECTOR_UP);
     sprite = null;
+    zIndex = 20;
     
     constructor(liveUntil, x, y) {
         super();
