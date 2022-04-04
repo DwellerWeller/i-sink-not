@@ -1183,7 +1183,7 @@ class GameOverScreen extends Entity {
         currentWaterHeight += timeSinceLastFrame / 10;
 
         ctx.font = `36pt ${FONT_STACK}`;
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = '#242738';
 
         let yPos = 100;
         const margin = 10;
