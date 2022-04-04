@@ -305,8 +305,10 @@ class GameController extends Entity {
             ctx.font = `64px ${FONT_STACK}`;
             const pauseText = 'PAUSED';
             const pauseTextMetrics = ctx.measureText(pauseText);
-            ctx.fillText(pauseText, CANVAS_WIDTH/2 - pauseTextMetrics.width/2, 200);
+            ctx.fillText(pauseText, CANVAS_WIDTH/2, 200);
         }
+
+        ctx.textAlign = 'left';
     }
 }
 
