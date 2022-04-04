@@ -420,7 +420,7 @@ class ShipModule extends Entity {
     }
 
     onMouseOver() {
-        if (this.damage > 0) {
+        if (this.damageLevel != 'normal') {
             canvasEl.style.cursor = 'pointer'; // TODO: wrench
         }
     }
@@ -430,7 +430,7 @@ class ShipModule extends Entity {
     }
 
     onClick(x, y) {
-        if (this.damage > 0) {
+        if (this.damageLevel != 'normal') {
             this.onStartFix();
             this.isBeingRepaired = true;
             state.doPlayerAction(1000, () => {
