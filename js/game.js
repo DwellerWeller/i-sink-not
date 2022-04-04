@@ -664,7 +664,7 @@ class BoilerModule extends ShipModule {
                 emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
             }
 
-            if (Math.random() < (this.difficultyCoefficient * 0.005)) {
+            if (Math.random() < (state.difficultyCoefficient * 0.005)) {
                 sound.play('boiler-break');
                 this.state = 'exploded';
             }
