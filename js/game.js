@@ -112,8 +112,8 @@ class State {
     get difficultyCoefficient() {
         // difficulty doubles for every:
         return Math.max(
-            this.distanceTraveled / 1000,  // kilometer, or
-            this.timeElapsed / 1000 / 60,  // minute
+            this.distanceTraveled / 1000 / 2,  // 2 kilometers, or
+            this.timeElapsed / 1000 / 60 / 2,  // 2 minutes
         );
         // whichever is worse!
     }
@@ -295,6 +295,8 @@ class ShipModule extends Entity {
     }
 
     sprite = null;
+    health = 10;
+    baseFragility = 0;
 
     constructor(ship, x, y) {
         super();
@@ -302,10 +304,32 @@ class ShipModule extends Entity {
         // x and y here are coordinates in the ship's grid, not relative to canvas!
         this.x = x;
         this.y = y;
+        this.damage = 0;
+
+        this.damageLevel = 'normal';
+        this.isBeingRepaired = false;
     }
 
     get weight() {
         return 5;
+    }
+
+    get fragility() {
+        if (this.baseFragility == 0) return 0;
+
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                if (j == 0 || i == 0) { // don't count diagonals
+                    if (i == 0 && j == 0) continue; // don't count self
+                    const adjacentModule = this.ship.getModule(this.x + i, this.y + j);
+                    if (adjacentModule && adjacentModule.constructor.name == 'CastleModule') {
+                        return this.baseFragility * .5;
+                    }
+                }
+            }
+        }
+
+        return this.baseFragility;
     }
 
     get percentSubmerged() {
@@ -326,11 +350,60 @@ class ShipModule extends Entity {
 
     updateDisplay() {}
 
-    tick() {
+    onDamage() {}
+    onBreak() {}
+    onStartFix() {
+        sound.play('repairing');
+    }
+    onFixed() {}
+
+    tick(timeSinceLastTick) {
         if (this.percentSubmerged > 0 && Math.random() < (state.speed / 10)) {
             const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
             const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
             emitParticle(SprayParticle, 600, spriteX, spriteY);
+        }
+
+        if (this.fragility != 0) {
+            if (Math.random() < .05) {
+                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/10) * Math.random();
+                this.damage = Math.min(this.health, this.damage + boost);
+            }
+            
+            if (this.damageLevel != 'broken' && this.damage == this.health) {
+                this.damageLevel = 'broken';
+                this.onBreak();
+            } else if (this.damageLevel == 'normal' && this.damage > this.health/2) {
+                this.damageLevel = 'damaged';
+                this.onDamage();
+            } else if (this.damageLevel != 'normal' && this.damage == 0) {
+                this.damageLevel = 'normal';
+                this.onFixed();
+            }
+        }
+    }
+
+    onMouseOver() {
+        if (this.damageLevel == 'broken') {
+            canvasEl.style.cursor = 'pointer'; // TODO: wrench
+            return true;
+        }
+        return false;
+    }
+
+    onMouseOut() {
+        canvasEl.style.cursor = 'default';
+    }
+
+    onClick(x, y) {
+        if (this.damageLevel == 'broken') {
+            this.onStartFix();
+            this.isBeingRepaired = true;
+            state.doPlayerAction(1000, () => {
+                this.damage = 0;
+                this.isBeingRepaired = false;
+                this.onFixed();
+            });
         }
     }
 
@@ -338,6 +411,16 @@ class ShipModule extends Entity {
         const sprite = this.sprite || this.constructor.sprite;
         if (sprite) {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        }
+
+        if (this.fragility > 0) {
+            if (this.damageLevel == 'damaged') {
+                ctx.fillStyle = 'rgba(255, 255, 0, .2)';
+                ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+            } else if (this.isBeingRepaired) {
+                ctx.fillStyle = 'rgba(255, 255, 0, .2)';
+                ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+            }
         }
     }
 }
@@ -361,9 +444,10 @@ class HullModule extends ShipModule {
     floodAmount = 0;
     buoyancy = 20;
 
+    baseFragility = 1;
+
     constructor(ship, x, y) {
         super(ship, x, y);
-        this.state = 'normal';
         this.updateDisplay();
     }
 
@@ -389,17 +473,13 @@ class HullModule extends ShipModule {
 
         super.tick(timeSinceLastTick, now);
 
-        if (this.state == 'normal') {
-            // it really could break deep underwater, but we'll be nice to the player here
-            if (this.percentSubmerged < 1) {
-                if (Math.random() < (state.difficultyCoefficient * 0.005)) {
-                    sound.play('breaking');
-                    this.state = 'leaking';
-                }
-            }
-        } else {
+        if (this.damageLevel == 'broken') {
             this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 2);
         }
+    }
+
+    onDamage() {
+        sound.play('breaking');
     }
 
     getStats() {
@@ -409,36 +489,8 @@ class HullModule extends ShipModule {
         }
     }
 
-    onMouseOver() {
-        if (this.state != 'normal') {
-            canvasEl.style.cursor = 'pointer';
-        } else if (this.floodAmount > 0) {
-            canvasEl.style.cursor = 'pointer';
-        }
-    }
-
-    onMouseOut() {
-        canvasEl.style.cursor = 'default';
-    }
-
-    onClick(x, y) {
-        if (this.state == 'leaking') {
-            sound.play('repairing');
-            this.state = 'repairing';
-
-            state.doPlayerAction(1000, () => {
-                this.state = 'normal';
-            });
-        } else if (this.floodAmount > 0) {
-            sound.play('bucket');
-            state.doPlayerAction(1000, () => {
-                this.floodAmount = Math.max(0, this.floodAmount-10);
-            });
-        }
-    }
-
     render() {
-        this.sprite = this.state !== 'normal' ? this.bustedSprite : this.defaultSprite;
+        this.sprite = this.damageLevel == 'broken' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
         // don't show indicator overlays during game over screen
@@ -456,11 +508,8 @@ class HullModule extends ShipModule {
             }
         }
 
-        if (this.state == 'repairing') {
-            ctx.fillStyle = 'rgba(255, 255, 0, .2)';
-            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-        } else if (this.floodAmount > 0) {
-            ctx.fillStyle = 'rgba(0, 0, 255, 1)';
+        if (this.floodAmount > 0) {
+            ctx.fillStyle = 'rgba(0, 0, 255, .5)';
             const percentFlooded = this.floodAmount / this.buoyancy;
             ctx.fillRect(0, Math.ceil(-SHIP_MODULE_HEIGHT * percentFlooded), SHIP_MODULE_WIDTH, Math.ceil(SHIP_MODULE_HEIGHT * percentFlooded));
         }
@@ -639,10 +688,7 @@ class BoilerModule extends ShipModule {
     static moduleName = 'Boiler';
     static description = 'Provides steam for propellors and balloons';
 
-    constructor(ship, x, y) {
-        super(ship, x, y);
-        this.state = 'normal';
-    }
+    baseFragility = 1;
 
     get weight() {
         return 10;
@@ -660,62 +706,31 @@ class BoilerModule extends ShipModule {
 
         super.tick(timeSinceLastTick, now);
             
-        if (this.state == 'normal') {
-            if (this.isGeneratingSteam && Math.random() < .5) {
-                // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
-                emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
-            }
-
-            if (Math.random() < (state.difficultyCoefficient * 0.005)) {
-                sound.play('boiler-break');
-                this.state = 'exploded';
-            }
+        if (this.isGeneratingSteam && Math.random() < .5) {
+            // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
         }
+    }
+
+    onBreak() {
+        sound.play('boiler-break');
     }
 
     get isGeneratingSteam() {
         if (this.percentSubmerged > .5)
             return false;
 
-        return this.state == 'normal';
-    }
-
-    onMouseOver() {
-        if (this.state == 'exploded') {
-            canvasEl.style.cursor = 'grab';
-        }
-    }
-
-    onMouseOut() {
-        canvasEl.style.cursor = 'default';
-    }
-
-    onClick(x, y) {
-        if (this.state == 'exploded') {
-            sound.play('repairing');
-            this.state = 'repairing';
-
-            state.doPlayerAction(1000, () => {
-                this.state = 'normal';
-            });
-        }
+        return this.damageLevel != 'broken';
     }
 
     render() {
+        super.render();
+
+        // TODO: show damaged state
         if (this.isGeneratingSteam) {
             let bob = getWaterBob(0, 0.5, 32);
             BoilerModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
             BoilerModule.windowSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
-        } else {
-            super.render();
-        }
-
-        if (this.state == 'exploded') {
-            ctx.fillStyle = 'rgba(255, 0, 0, .2)';
-            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-        } else if (this.state == 'repairing') {
-            ctx.fillStyle = 'rgba(255, 255, 0, .2)';
-            ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
         }
     }
 }
@@ -819,7 +834,7 @@ class CastleModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.castle;
 
     static moduleName = 'Castle';
-    static description = 'Looks really cool';
+    static description = 'Reinforces adjacent modules (and looks really cool)';
     
     weight = 20;
 
@@ -899,10 +914,12 @@ class Ship extends Entity {
                 ctx.translate(translateX, translateY);
                 
                 const module = row ? row[x] : null;
-                // debug
-                state.debug && ctx.fillText(`${x}, ${y}`, 0, -SHIP_MODULE_HEIGHT);
                 if (module) {
                     module.render(now);
+                }
+                if (state.debug) {
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(`${module.damage.toFixed(2)}`, 0, -SHIP_MODULE_HEIGHT);
                 }
                 ctx.translate(-translateX, -translateY);
             }
