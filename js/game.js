@@ -1174,6 +1174,7 @@ class GameOverScreen extends Entity {
     constructor(timeElapsed) {
         super();
         this.timeElapsed = timeElapsed;
+        state.cooldown = 0;
     }
 
     checkClick(x, y) { return this; }
