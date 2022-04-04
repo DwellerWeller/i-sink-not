@@ -21,6 +21,8 @@ sounds['row'] = 0.70;
 sounds['bucket'] = new Audio('sound/bucket.mp3');
 sounds['bucket'].volume = 0.70;
 
+sounds['boiler-break'] = new Audio('sound/boiler-break.mp3');
+
 export var theme_song = new Audio('sound/i sink not - song 1 - title.mp3');
 theme_song.addEventListener('timeupdate', function(){
     var buffer = .44;

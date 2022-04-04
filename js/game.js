@@ -630,7 +630,7 @@ class BoilerModule extends ShipModule {
             }
 
             if (Math.random() < 0.005) {
-                sound.play('breaking');
+                sound.play('boiler-break');
                 this.state = 'exploded';
             }
         }
