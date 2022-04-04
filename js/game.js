@@ -224,6 +224,7 @@ class GameController extends Entity {
         if (state.shipHeight < state.shipDraught && state.gameRunning) {
             // TODO: if the top row of modules is all NullModule don't count it
             state.gameRunning = false;
+            state.ship.updating = false;
             sound.play('gameover');
             entities.push(new GameOverScreen(state.timeElapsed));
         }
@@ -399,11 +400,9 @@ class ShipModule extends Entity {
     }
 
     onMouseOver() {
-        if (this.damageLevel == 'broken') {
+        if (this.damage > 0) {
             canvasEl.style.cursor = 'pointer'; // TODO: wrench
-            return true;
         }
-        return false;
     }
 
     onMouseOut() {
@@ -411,7 +410,7 @@ class ShipModule extends Entity {
     }
 
     onClick(x, y) {
-        if (this.damageLevel == 'broken') {
+        if (this.damage > 0) {
             this.onStartFix();
             this.isBeingRepaired = true;
             state.doPlayerAction(1000, () => {
@@ -427,6 +426,9 @@ class ShipModule extends Entity {
         if (sprite) {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
+
+        // don't show indicator overlays during game over screen
+        if (!this.ship.updating) return;
 
         if (this.fragility > 0) {
             if (this.damageLevel == 'damaged') {
@@ -512,9 +514,6 @@ class HullModule extends ShipModule {
         this.sprite = this.damageLevel == 'broken' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
-        // don't show indicator overlays during game over screen
-        if (!this.ship.updating) return;
-
         if (this.renderTopHull) {
             if (this.topHullSprite) {
                 this.topHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
@@ -526,6 +525,9 @@ class HullModule extends ShipModule {
                 this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
         }
+
+        // don't show indicator overlays during game over screen
+        if (!this.ship.updating) return;
 
         if (this.floodAmount > 0) {
             ctx.fillStyle = 'rgba(0, 0, 255, .5)';
@@ -943,6 +945,7 @@ class Ship extends Entity {
                     module.render(now);
                 }
                 if (state.debug) {
+                    ctx.font = `24pt ${FONT_STACK}`;
                     ctx.fillStyle = 'white';
                     ctx.fillText(`${module.damage.toFixed(2)}`, 0, -SHIP_MODULE_HEIGHT);
                 }
