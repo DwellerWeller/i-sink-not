@@ -330,6 +330,9 @@ class ShipModule extends Entity {
 class HullModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.hull;
 
+    static moduleName = 'Hull';
+    static description = 'It makes you float';
+
     sprite = HullModule.sprite;
 
     defaultSprite = shipSpriteSheet.sprites.hull;
@@ -497,6 +500,11 @@ class NullModule extends ShipModule {
 
         sound.play('confirm');
         const menuEl = document.createElement('div');
+
+        const headerEl = document.createElement('h1');
+        headerEl.textContent = 'Construct a module';
+        menuEl.appendChild(headerEl);
+
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
@@ -520,20 +528,15 @@ class NullModule extends ShipModule {
             const moduleEl = document.createElement('button');
             const sprite = moduleType.sprite;
             moduleEl.moduleType = moduleType;
-            moduleEl.style.position = 'relative';
-            moduleEl.style.overflow = 'hidden';
  
             if (sprite) {
                 const div = document.createElement('div');
+                div.classList.add('icon');
                 div.style.background = `url(${sprite.spriteSheet.src}) no-repeat -${sprite.x}px -${sprite.y}px`;
                 div.style.width = sprite.width + 'px';
                 div.style.height = sprite.height + 'px';
-                div.style.position = 'absolute';
-                div.style.transform = 'translate(-50%, -50%) scale(.5)';
-                div.style.transformOrigin = 'center';
-                div.style.top = '50%';
-                div.style.left = '50%';
-                div.style.pointerEvents = 'none';
+
+                moduleEl.innerHTML = `<p class="description"><b>${moduleType.moduleName}</b><br>${moduleType.description}</p>`;
 
                 moduleEl.appendChild(div);
             } else {
@@ -545,7 +548,7 @@ class NullModule extends ShipModule {
 
         const cancelEl = document.createElement('button');
         cancelEl.id = 'cancel';
-        cancelEl.textContent = '🚫';
+        cancelEl.innerHTML = '<p class="description">Cancel</p>';
         menuEl.appendChild(cancelEl);
 
         state.paused = true;
@@ -580,6 +583,9 @@ class ConstructionModule extends ShipModule {
 class SailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.sail;
 
+    static moduleName = 'Sail';
+    static description = 'Makes you go';
+
     solid = false;
 
     get weight() {
@@ -608,6 +614,9 @@ class SailModule extends ShipModule {
 
 class BoilerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.boiler;
+
+    static moduleName = 'Boiler';
+    static description = 'Provides steam for propellors and balloons';
 
     constructor(ship, x, y) {
         super(ship, x, y);
@@ -691,6 +700,9 @@ class BoilerModule extends ShipModule {
 class PropellerModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.propeller;
 
+    static moduleName = 'Propellor';
+    static description = 'Makes you go <i>fast</i>. Must be attached to a functioning boiler';
+
     static blurSprites = [
         shipSpriteSheet.sprites.propeller_blur_1,
         shipSpriteSheet.sprites.propeller_blur_2,
@@ -732,6 +744,9 @@ class BalloonModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.balloon_top;
     static baseSprite = shipSpriteSheet.sprites.balloon_base;
 
+    static moduleName = 'Balloon';
+    static description = 'Makes you go <i>up</i>. Must be attached to a functioning boiler'
+
     solid = false;
 
     get isInflated() {
@@ -759,6 +774,9 @@ class BalloonModule extends ShipModule {
 class FinSailModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.fin_sail;
     solid = false;
+
+    static moduleName = 'Fin sail';
+    static description = 'Makes you go';
 
     get weight() {
         return 2.5;
