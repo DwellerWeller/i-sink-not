@@ -366,7 +366,7 @@ class ShipModule extends Entity {
 
         if (this.fragility != 0) {
             if (Math.random() < .05) {
-                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/10) * Math.random();
+                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/50) * Math.random();
                 this.damage = Math.min(this.health, this.damage + boost);
             }
             
@@ -480,6 +480,10 @@ class HullModule extends ShipModule {
 
     onDamage() {
         sound.play('breaking');
+    }
+
+    onFixed() {
+        this.floodAmount = 0;
     }
 
     getStats() {
