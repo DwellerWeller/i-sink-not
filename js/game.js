@@ -385,7 +385,7 @@ class ShipModule extends Entity {
             }
         }
 
-        if (this.damageLevel === 'broken' && this.percentSubmerged > .5) {
+        if (this.damageLevel === 'broken' && isEntityInteractive(this) && this.percentSubmerged < .5) {
             this.icon = shipSpriteSheet.sprites.hammer_icon;
         }
     }
