@@ -12,7 +12,9 @@ const BUTTON_SIZE = 50;
 const BUTTON_MARGIN = 20;
 
 const DEFAULT_WATER_HEIGHT = 100;
-let currentWaterHeight = 100;
+let currentWaterHeight = DEFAULT_WATER_HEIGHT;
+
+const FONT_STACK =  `'Book Antiqua', Palatino, 'Palatino Linotype', 'Palatino LT STD', Georgia, serif`;
 
 const vectorLength = vec => Math.sqrt((vec.x ** 2) + (vec.y ** 2));
 
@@ -212,7 +214,7 @@ class GameController extends Entity {
             // TODO: if the top row of modules is all NullModule don't count it
             state.gameRunning = false;
             sound.gameover.play();
-            entities.push(new GameOverScreen(state.distanceTraveled, state.timeElapsed));
+            entities.push(new GameOverScreen(state.timeElapsed));
         }
 
         if (!state.gameRunning) return;
@@ -776,7 +778,7 @@ class Ship extends Entity {
         const ship = this;
         this.box = {
             // position is anchored to the bottom left corner of the ship
-            x: SHIP_MODULE_WIDTH*2,
+            x: SHIP_MODULE_WIDTH / 2,
             get y() { return CANVAS_HEIGHT - currentWaterHeight + state.shipDraught },
             get width() { return ship.columns * SHIP_MODULE_WIDTH },
             get height() { return ship.modules.length * SHIP_MODULE_HEIGHT },
@@ -893,6 +895,18 @@ class Ship extends Entity {
     updateModule(x, y) {
         const module = this.getModule(x, y);
         if (module) module.updateDisplay();
+    }
+
+    get moduleCount() {
+        let moduleCount = 0;
+        for (const row of this.modules) {
+            for (const module of row) {
+                if (module.constructor.name != 'NullModule') {
+                    moduleCount += 1;
+                }
+            }
+        }
+        return moduleCount;
     }
 
     getModule(x, y, ModuleClass = undefined) {
@@ -1135,15 +1149,14 @@ class TitleScreen extends Entity {
             ctx.globalAlpha = 1 - fadeProgress;
         }
 
-        const fontStack =  `'Book Antiqua', Palatino, 'Palatino Linotype', 'Palatino LT STD', Georgia, serif`;
         ctx.fillStyle = '#242738';
 	    ctx.textAlign = "center";
-        ctx.font = `87pt ${fontStack}`;
+        ctx.font = `87pt ${FONT_STACK}`;
         let text = 'I Sink Not';
         let textMetrics = ctx.measureText(text);
         let yPosition = CANVAS_WIDTH / 5;
 	    ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
-        ctx.font = `24pt ${fontStack}`;
+        ctx.font = `24pt ${FONT_STACK}`;
 
         yPosition += textMetrics.actualBoundingBoxAscent + 15;
         text = 'A Ludum Dare game by';
@@ -1155,12 +1168,12 @@ class TitleScreen extends Entity {
         ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
         
         yPosition += textMetrics.actualBoundingBoxAscent + 15;
-        ctx.font = `italic 24pt ${fontStack}`;
+        ctx.font = `italic 24pt ${FONT_STACK}`;
         text = '“Delay the inevitable”';
         ctx.fillText(text, CANVAS_WIDTH / 2, yPosition);
 
         yPosition += (textMetrics.actualBoundingBoxAscent + 15) * 2;
-        ctx.font = `24pt ${fontStack}`;
+        ctx.font = `24pt ${FONT_STACK}`;
         ctx.fillText('Click anywhere to start', CANVAS_WIDTH / 2, yPosition);
 
         ctx.restore();
@@ -1171,22 +1184,50 @@ class GameOverScreen extends Entity {
     zIndex = 1000;
     canClickWhilePaused = true;
 
-    constructor(distanceTraveled, timeElapsed) {
+    constructor(timeElapsed) {
         super();
-        this.distanceTraveled = distanceTraveled;
         this.timeElapsed = timeElapsed;
-    }
-
-    tick() {
-        currentWaterHeight += 5;
     }
 
     checkClick(x, y) { return this; }
 
-    render() {
+    render(now) {
+        const timeSinceLastFrame = now - previousFrame;
+        currentWaterHeight += timeSinceLastFrame / 10;
+
+        ctx.font = `36pt ${FONT_STACK}`;
         ctx.fillStyle = 'black';
-        ctx.fillText(`blub blub. you made it ${Math.floor(this.distanceTraveled)} meters and stayed afloat ${Math.floor(this.timeElapsed / 1000)} seconds`, 100, 100);
-        ctx.fillText('click anywhere to try again', 100, 200);
+
+        let yPos = 100;
+        const margin = 10;
+
+        const titleText = 'It was bound to happen'
+        const titleMetrics = ctx.measureText(titleText);
+        const leftEdge = CANVAS_WIDTH - titleMetrics.width - 25;
+        ctx.fillText(titleText, leftEdge, yPos);
+        yPos += titleMetrics.actualBoundingBoxAscent + margin;
+        ctx.font = `24pt ${FONT_STACK}`;
+
+        yPos += margin * 4;
+
+        const timeText = `Time: ${Math.floor(this.timeElapsed / 1000)}s`;
+        const timeMetrics = ctx.measureText(timeText);
+        ctx.fillText(timeText, leftEdge, yPos);
+        yPos += timeMetrics.actualBoundingBoxAscent + margin;
+
+        const distanceText = `Distance: ${Math.floor(state.distanceTraveled)}m`;
+        const distanceMetrics = ctx.measureText(distanceText);
+        ctx.fillText(distanceText, leftEdge, yPos);
+        yPos += distanceMetrics.actualBoundingBoxAscent + margin;
+
+        const modulesText = `Modules: ${state.ship.moduleCount}`;
+        const modulesMetrics = ctx.measureText(modulesText);
+        ctx.fillText(modulesText, leftEdge, yPos);
+        yPos += modulesMetrics.actualBoundingBoxAscent + margin;
+
+        yPos += margin * 4;
+
+        ctx.fillText('Click anywhere to try again', leftEdge, yPos);
     }
 
     onClick() {
