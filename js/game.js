@@ -1124,7 +1124,7 @@ class DebugDisplay extends Entity {
         ctx.fillStyle = 'black';
         ctx.font = '24px sans-serif';
 
-        let offsetY = 75;
+        let offsetY = 275;
         for (let key of this.stateKeys) {
             let val = state[key];
             if (typeof val === 'number') val = val.toFixed(2);
