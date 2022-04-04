@@ -122,9 +122,9 @@ class State {
 
 let state;
 
-function getWaterBob(offset = 0, magnitude = 5) {
+function getWaterBob(offset = 0, magnitude = 5, interval = 250) {
     const timeElapsed = performance.now() - firstFrame;
-    return magnitude * Math.sin((timeElapsed + offset) / 250);
+    return magnitude * Math.sin((timeElapsed + offset) / interval);
 }
 
 const isPointInBox = (x, y, box) => !(x < box.x || x > box.x + box.width || y < box.y || y > box.y + box.height);
@@ -766,7 +766,7 @@ class BalloonModule extends ShipModule {
     render() {
         BalloonModule.baseSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         // TODO should animate up and down
-        const inflationOffset = this.isInflated ? 0 : 48;
+        const inflationOffset = this.isInflated ? getWaterBob(0, 3, 400) : 48;
         BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
 }
