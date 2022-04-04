@@ -267,7 +267,7 @@ class GameController extends Entity {
         const secondsAfloat = Math.floor(state.timeAfloat / 1000);
         const timeText = `${secondsAfloat}s`;
         const timeTextMetrics = ctx.measureText(timeText);
-        ctx.fillText(timeText, Math.floor(CANVAS_WIDTH - timeTextMetrics.width) - textMargin, (Math.floor(textMetrics.actualBoundingBoxAscent) + textMargin) * 2);
+        ctx.fillText(timeText, textMargin, timeTextMetrics.actualBoundingBoxAscent + textMargin);
 
     }
 }
