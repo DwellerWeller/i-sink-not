@@ -1,23 +1,25 @@
-export var building  = new Audio('sound/building.mp3');
-building.volume = 0.70;
+var sounds = {};
 
-export var repairing  = new Audio('sound/repairing.mp3');
-repairing.volume = 0.70;
+sounds['building'] = new Audio('sound/building.mp3');
+sounds['building'].volume = 0.70;
 
-export var breaking  = new Audio('sound/breaking.mp3');
-breaking.volume = 0.70;
+sounds['repairing'] = new Audio('sound/repairing.mp3');
+sounds['repairing'].volume = 0.70;
 
-export var confirm  = new Audio('sound/confirm.mp3');
-confirm.volume = 0.70;
+sounds['breaking'] = new Audio('sound/breaking.mp3');
+sounds['breaking'].volume = 0.70;
 
-export var cancel  = new Audio('sound/cancel.mp3');
-cancel.volume = 0.50
+sounds['confirm'] = new Audio('sound/confirm.mp3');
+sounds['confirm'].volume = 0.70;
 
-export var row  = new Audio('sound/row.mp3');
-row.volume = 0.70;
+sounds['cancel'] = new Audio('sound/cancel.mp3');
+sounds['cancel'].volume = 0.50
 
-export var bucket  = new Audio('sound/bucket.mp3');
-bucket.volume = 0.70;
+sounds['row'] = new Audio('sound/row.mp3');
+sounds['row'] = 0.70;
+
+sounds['bucket'] = new Audio('sound/bucket.mp3');
+sounds['bucket'].volume = 0.70;
 
 export var theme_song = new Audio('sound/i sink not - song 1 - title.mp3');
 theme_song.addEventListener('timeupdate', function(){
@@ -37,4 +39,9 @@ main_song.addEventListener('timeupdate', function(){
     }
 });
 
-export var gameover  = new Audio('sound/gameover.mp3');
+sounds['gameover'] = new Audio('sound/gameover.mp3');
+
+export function play(sound) {
+	sounds[sound].currentTime = 0;
+	sounds[sound].play();
+}

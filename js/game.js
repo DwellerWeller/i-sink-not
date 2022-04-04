@@ -212,7 +212,7 @@ class GameController extends Entity {
         if (state.shipHeight < state.shipDraught && state.gameRunning) {
             // TODO: if the top row of modules is all NullModule don't count it
             state.gameRunning = false;
-            sound.gameover.play();
+            sound.play('gameover');
             entities.push(new GameOverScreen(state.timeElapsed));
         }
 
@@ -377,7 +377,7 @@ class HullModule extends ShipModule {
 
         if (this.state == 'normal') {
             if (Math.random() < 0.005) {
-                sound.breaking.play();
+                sound.play('breaking');
                 this.state = 'leaking';
             }
         } else {
@@ -406,14 +406,14 @@ class HullModule extends ShipModule {
 
     onClick(x, y) {
         if (this.state == 'leaking') {
-            sound.repairing.play();
+            sound.play('repairing');
             this.state = 'repairing';
 
             state.doPlayerAction(1000, () => {
                 this.state = 'normal';
             });
         } else if (this.floodAmount > 0) {
-            sound.bucket.play();
+            sound.play('bucket');
             state.doPlayerAction(1000, () => {
                 this.floodAmount = Math.max(0, this.floodAmount-10);
             });
@@ -489,12 +489,12 @@ class NullModule extends ShipModule {
             return;
         }
 
-        sound.confirm.play();
+        sound.play('confirm');
         const menuEl = document.createElement('div');
         menuEl.id = 'module-menu';
         menuEl.onclick = (ev) => {
             if (ev.target.moduleType) {
-                sound.building.play();
+                sound.play('building');
                 this.ship.addModule(this.x, this.y, ConstructionModule);
 
                 state.doPlayerAction(1000, () => {
@@ -503,7 +503,7 @@ class NullModule extends ShipModule {
             } else if (ev.target.id != 'cancel') {
                 return;
             } else if (ev.target.id == 'cancel') {
-                sound.cancel.play();
+                sound.play('cancel');
             }
 
             menuEl.remove();
@@ -630,7 +630,7 @@ class BoilerModule extends ShipModule {
             }
 
             if (Math.random() < 0.005) {
-                sound.breaking.play();
+                sound.play('breaking');
                 this.state = 'exploded';
             }
         }
@@ -655,7 +655,7 @@ class BoilerModule extends ShipModule {
 
     onClick(x, y) {
         if (this.state == 'exploded') {
-            sound.repairing.play();
+            sound.play('repairing');
             this.state = 'repairing';
 
             state.doPlayerAction(1000, () => {
