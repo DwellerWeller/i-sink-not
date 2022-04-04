@@ -223,6 +223,7 @@ class GameController extends Entity {
         if (state.shipHeight < state.shipDraught && state.gameRunning) {
             // TODO: if the top row of modules is all NullModule don't count it
             state.gameRunning = false;
+            state.ship.updating = false;
             sound.play('gameover');
             entities.push(new GameOverScreen(state.timeElapsed));
         }
@@ -425,6 +426,9 @@ class ShipModule extends Entity {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
 
+        // don't show indicator overlays during game over screen
+        if (!this.ship.updating) return;
+
         if (this.fragility > 0) {
             if (this.damageLevel == 'damaged') {
                 ctx.fillStyle = 'rgba(255, 255, 0, .2)';
@@ -509,9 +513,6 @@ class HullModule extends ShipModule {
         this.sprite = this.damageLevel == 'broken' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
-        // don't show indicator overlays during game over screen
-        if (!this.ship.updating) return;
-
         if (this.renderTopHull) {
             if (this.topHullSprite) {
                 this.topHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
@@ -523,6 +524,9 @@ class HullModule extends ShipModule {
                 this.sideHullSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
             }
         }
+
+        // don't show indicator overlays during game over screen
+        if (!this.ship.updating) return;
 
         if (this.floodAmount > 0) {
             ctx.fillStyle = 'rgba(0, 0, 255, .5)';
