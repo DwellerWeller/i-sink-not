@@ -796,6 +796,9 @@ class FinSailModule extends ShipModule {
 
 class CastleModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.castle;
+
+    static moduleName = 'Castle';
+    static description = 'Looks really cool';
     
     weight = 20;
 
