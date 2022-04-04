@@ -52,6 +52,10 @@ class SpriteSheet {
         this.sprites[name] = sprite;
         return sprite;
     }
+
+    getAllSprites() {
+        return Object.values(this.sprites);
+    }
 }
 
 export class AnimatedSpriteController {
@@ -110,7 +114,6 @@ shipSpriteSheet.createSprite('square_outline', 737, 600, 116, 119, -8, -8);
 shipSpriteSheet.createSprite('square_bg', 611, 598, 113, 117, -8, -8);
 shipSpriteSheet.createSprite('icon_bg', 459, 757, 72, 74, 36, 37);
 
-
 window.shipSpriteSheet = shipSpriteSheet;
 
 const parallaxBgRed = await loadImage('art/parallax bg red.png');
@@ -133,4 +136,15 @@ const playImg = await loadImage('art/play.png');
 
 window.playImg = playImg;
 
-export { shipSpriteSheet };
+const islandSpriteSheet = new SpriteSheet('art/island-spritesheet.png');
+
+islandSpriteSheet.createSprite('small_1', 606, 593, 146, 67);
+islandSpriteSheet.createSprite('small_2', 807, 591, 110, 69);
+islandSpriteSheet.createSprite('medium_1', 719, 416, 257, 116);
+islandSpriteSheet.createSprite('medium_2', 685, 707, 241, 77);
+islandSpriteSheet.createSprite('large_1', 628, 871, 374, 102);
+
+window.islandSpriteSheet = islandSpriteSheet;
+
+export { shipSpriteSheet, islandSpriteSheet };
+

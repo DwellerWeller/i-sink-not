@@ -1,7 +1,7 @@
 import * as end from './end.js';
 import * as sound from './sound.js';
 
-import { shipSpriteSheet, AnimatedSpriteController } from './art.js';
+import { shipSpriteSheet, AnimatedSpriteController, islandSpriteSheet } from './art.js';
 
 let canvasEl;
 let ctx;
@@ -204,6 +204,8 @@ function onMouseMove(ev) {
     }
 }
 
+
+
 function drawParallax(img, speed, x_offset, y_offset) {
     var numImages = Math.ceil(CANVAS_WIDTH / (img.width + x_offset)) + 1;
     var xpos = state.bgDistanceTraveled * 100 * speed % img.width;
@@ -309,6 +311,44 @@ class GameController extends Entity {
         }
 
         ctx.textAlign = 'left';
+    }
+}
+
+class Island extends Entity {
+    scale = 1.5;
+
+    constructor(sprite, startingPoint) {
+        super();
+        this.sprite = sprite;
+        this.startingPoint = startingPoint;
+    }
+    
+    render() {
+        if (!this.alive) return;
+
+        const { sprite, scale, startingPoint } = this;
+        const xPos = CANVAS_WIDTH - ((state.bgDistanceTraveled - startingPoint) * 100 * .06);
+        
+        if (xPos <= 0 - sprite.width * scale) {
+            this.alive = false;
+        } else {
+            sprite.draw(ctx, xPos, CANVAS_HEIGHT - currentWaterHeight - sprite.height + 20, sprite.width * scale, sprite.height * scale);
+        }
+    }
+}
+
+class IslandController extends Entity {
+    islands = islandSpriteSheet.getAllSprites();
+    spawnInterval = 500;
+    islandsSpawned = 0;
+
+    tick() {
+        const intervals = Math.floor(state.distanceTraveled / this.spawnInterval);
+        if (intervals > this.islandsSpawned) {
+            this.islandsSpawned = intervals;
+            const i = Math.floor(Math.random() * this.islands.length);
+            entities.push(new Island(this.islands[i], state.bgDistanceTraveled));
+        }
     }
 }
 
@@ -922,7 +962,7 @@ const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinS
 class Ship extends Entity {
     columns = 5;
     rows = 1;
-
+    zIndex = 10;
     modules = [];
 
     constructor() {
@@ -1091,6 +1131,8 @@ class Ship extends Entity {
 }
 
 class Water extends Entity {
+    zIndex = 1;
+
     constructor(height, alpha, parallaxSpeed, x_offset) {
         super();
         this.height = height;
@@ -1556,6 +1598,7 @@ export function setUp(canvasEl_) {
 
     ship.addModule(2, 0, HullModule);
 
+    entities.push(new IslandController());
     entities.push(new Water(10, 1, .1, 0));
 
     entities.push(ship);
