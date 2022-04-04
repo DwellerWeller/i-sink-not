@@ -1083,14 +1083,19 @@ class Ship extends Entity {
                 this.modules[y+yOffset] = newRow;
             }
         }
-        this.modules[y][x] = new ModuleClass(this, x, y);
+
+        const newModule = new ModuleClass(this, x, y);
+        this.modules[y][x] = newModule;
 
         this.updateModule(x - 1, y);
         this.updateModule(x + 1, y);
         this.updateModule(x, y - 1);
         this.updateModule(x, y + 1);
 
-        emitParticle(SteamParticle, 1000, this.globalX, this.globalY);
+        const { globalX, globalY } = newModule;
+        for (let i = 0; i < 5; i++) {   
+            emitParticle(SteamParticle, 1000, newModule.globalX + (i/5 * SHIP_MODULE_WIDTH), newModule.globalY);
+        }
     }
 
     updateModule(x, y) {
@@ -1199,7 +1204,7 @@ function emitParticle(ParticleClass, life, x, y) {
 }
 
 class Particle extends Entity {
-    speed = 5;
+    speed = 3;
     forceVector = VECTOR_UP;
     direction = cloneVector(VECTOR_UP);
     sprite = null;
