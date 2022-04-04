@@ -1405,7 +1405,7 @@ export function setUp(canvasEl_) {
         }
     });
 
-    ship.addModule(1, 0, HullModule);
+    ship.addModule(2, 0, HullModule);
 
     entities.push(new Water(10, 1, .1, 0));
 
