@@ -759,6 +759,11 @@ class BoilerModule extends ShipModule {
 
     baseFragility = 1;
 
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.hasSmokeStack = null;
+    }
+
     get weight() {
         return 10;
     }
@@ -774,8 +779,16 @@ class BoilerModule extends ShipModule {
         }
 
         super.tick(timeSinceLastTick, now);
-            
-        if (this.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
+        
+        if (this.hasSmokeStack === null) {
+            const moduleAbove = state.ship.getModule(this.x, this.y + 1);
+            const moduleAboveType = moduleAbove && moduleAbove.constructor.name;
+            if (moduleAboveType != 'NullModule' && moduleAboveType != 'ConstructionModule') {
+                this.hasSmokeStack = moduleAbove.constructor.name == 'SmokeStackModule';
+            }
+        }
+
+        if (this.isGeneratingSteam && !this.hasSmokeStack && Math.random() < timeSinceLastTick / 200) {
             // emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
             emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
         }
@@ -923,8 +936,8 @@ class CastleModule extends ShipModule {
 
 class SmokeStackModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.smoke_stack;
-    static moduleName = 'Steam Stack';
-    static description = 'Must be built above a boiler';
+    static moduleName = 'Smoke Stack';
+    static description = 'Get that smoke outta here';
     static solid = false;
 
     weight = 8;
