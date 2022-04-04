@@ -70,6 +70,7 @@ class State {
     debug = false;
     gameRunning = true;
     paused = false;
+    pause_time = 0;
     shipDraught = 10;
     timeAfloat = 0;
     distanceTraveled = 0;
@@ -133,7 +134,8 @@ class State {
 let state;
 
 function getWaterBob(offset = 0, magnitude = 5, interval = 250) {
-    const timeElapsed = performance.now() - firstFrame;
+    let now = state.paused ? state.paused_time : performance.now();
+    const timeElapsed = now - firstFrame;
     return magnitude * Math.sin((timeElapsed + offset) / interval);
 }
 
@@ -215,8 +217,10 @@ function drawParallax(img, speed, x_offset, y_offset) {
      ctx.drawImage(img, i * img.width * 1 + x_offset, y_offset);
     }
     ctx.restore();
-    const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
-    state.bgDistanceTraveled += timeSinceLastFrame * (state.speed / 1000);
+    if (!state.paused) {
+        const timeSinceLastFrame = Math.min(performance.now() - previousFrame, 1000);
+        state.bgDistanceTraveled += timeSinceLastFrame * (state.speed / 1000);
+    }
 }
 
 class GameController extends Entity {
@@ -435,7 +439,7 @@ class ShipModule extends Entity {
 
         if (this.fragility != 0) {
             if (Math.random() < timeSinceLastTick * .0005) {
-                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/50) * Math.random();
+                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/25) * Math.random();
                 this.damage = Math.min(this.health, this.damage + boost);
             }
             
@@ -532,7 +536,7 @@ class HullModule extends ShipModule {
         super.tick(timeSinceLastTick, now);
 
         if (this.damageLevel == 'broken') {
-            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 2);
+            this.floodAmount = Math.min(this.buoyancy, this.floodAmount + timeSinceLastTick/1000 * 3);
         }
     }
 
@@ -686,6 +690,7 @@ class NullModule extends ShipModule {
         menuEl.appendChild(cancelEl);
 
         state.paused = true;
+        state.paused_time = performance.now();
         document.body.appendChild(menuEl);
     }
 
