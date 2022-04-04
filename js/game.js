@@ -718,7 +718,8 @@ class PropellerModule extends ShipModule {
 }
 
 class BalloonModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.fin_sail;
+    static sprite = shipSpriteSheet.sprites.balloon_top;
+    static baseSprite = shipSpriteSheet.sprites.balloon_base;
 
     solid = false;
 
@@ -737,9 +738,10 @@ class BalloonModule extends ShipModule {
     }
 
     render() {
-        // TODO
-        ctx.fillStyle = this.isInflated ? '#00ff00' : '#ff0000';
-        ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
+        BalloonModule.baseSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
+        // TODO should animate up and down
+        const inflationOffset = this.isInflated ? 0 : 48;
+        BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
 }
 
