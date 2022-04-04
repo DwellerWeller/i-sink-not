@@ -23,8 +23,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 3px solid black;
     background: rgba(128, 128, 128, .5);
+    border-radius: 10px;
 
     display: flex;
     flex-direction: column;
@@ -33,16 +33,24 @@ body {
 #module-menu h1 {
     margin: 0 1em;
     text-align: center;
+    user-select: none;
 }
 
 #module-menu button {
     display: block;
     position: relative;
-    border: 1px solid black;
+    background: cornsilk;
+    border: 3px solid cornsilk;
     margin: 1em;
     text-align: left;
     height: 100px;
     padding-right: 1em;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#module-menu button:hover {
+    border-color: hsl(48, 100%, 53%);
 }
 
 #module-menu button * {
