@@ -718,6 +718,19 @@ class NullModule extends ShipModule {
 class ConstructionModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.scaffolding;
     static solid = false;
+
+    static BITS = [
+        shipSpriteSheet.sprites.bit_screw,
+        shipSpriteSheet.sprites.bit_wood,
+        shipSpriteSheet.sprites.bit_plate,
+    ]
+
+    tick() {
+        if (Math.random() < .3) {
+            const p = emitParticle(BitParticle, 700, this.globalX + Math.random() * SHIP_MODULE_WIDTH, this.globalY - (Math.random() * SHIP_MODULE_HEIGHT/2));
+            p.sprite = ConstructionModule.BITS[Math.floor(Math.random() * ConstructionModule.BITS.length)];
+        }
+    }
 }
 
 class SailModule extends ShipModule {
@@ -1198,17 +1211,18 @@ class ShipUI extends Entity {
 }
 
 function emitParticle(ParticleClass, life, x, y) {
-    entities.push(
-        new ParticleClass(performance.now() + life, x, y),
-    );
+    const p = new ParticleClass(performance.now() + life, x, y);
+    entities.push(p);
+    return p;
 }
 
 class Particle extends Entity {
     speed = 3;
-    forceVector = VECTOR_UP;
+    forceVector = scaleVector(cloneVector(VECTOR_UP), .5);
     direction = cloneVector(VECTOR_UP);
     sprite = null;
     zIndex = 20;
+    fade = 1;
     
     constructor(liveUntil, x, y) {
         super();
@@ -1243,10 +1257,21 @@ class Particle extends Entity {
 
         const currentT = t - this.created;
         const targetT = this.liveUntil - this.created;
-        ctx.globalAlpha = 1 - (currentT / targetT);
+        ctx.globalAlpha = 1 - ((currentT / targetT) * this.fade);
         this.sprite.draw(ctx, this.x, this.y);
         ctx.globalAlpha = 1;
     }
+}
+
+
+class BitParticle extends Particle {
+    forceVector = scaleVector(cloneVector(VECTOR_DOWN), .5);
+    direction = normalizeVector({
+        x: (Math.random() * 2) - 1,
+        y: -1,
+    });
+    speed = 5;
+    fade = 0;
 }
 
 class SteamParticle extends Particle {
