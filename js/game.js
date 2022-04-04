@@ -435,7 +435,7 @@ class ShipModule extends Entity {
 
         if (this.fragility != 0) {
             if (Math.random() < timeSinceLastTick * .0005) {
-                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/50) * Math.random();
+                const boost = this.fragility * state.difficultyCoefficient * (timeSinceLastTick/25) * Math.random();
                 this.damage = Math.min(this.health, this.damage + boost);
             }
             
