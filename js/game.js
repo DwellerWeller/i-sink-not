@@ -446,19 +446,6 @@ class ShipModule extends Entity {
         if (sprite) {
             sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
         }
-
-        // don't show indicator overlays during game over screen
-        if (!this.ship.updating || !state.gameRunning) return;
-
-        if (this.fragility > 0) {
-            if (this.damageLevel == 'damaged') {
-                ctx.fillStyle = 'rgba(255, 255, 0, .2)';
-                ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-            } else if (this.isBeingRepaired) {
-                ctx.fillStyle = 'rgba(255, 255, 0, .2)';
-                ctx.fillRect(0, -SHIP_MODULE_HEIGHT, SHIP_MODULE_WIDTH, SHIP_MODULE_HEIGHT);
-            }
-        }
     }
 }
 
@@ -531,7 +518,7 @@ class HullModule extends ShipModule {
     }
 
     render() {
-        this.sprite = this.damageLevel == 'broken' ? this.bustedSprite : this.defaultSprite;
+        this.sprite = this.damageLevel != 'normal' ? this.bustedSprite : this.defaultSprite;
         super.render();
 
         if (this.renderTopHull) {
