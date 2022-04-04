@@ -829,7 +829,30 @@ class CastleModule extends ShipModule {
     }
 }
 
-const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule];
+class SmokeStackModule extends ShipModule {
+    static sprite = shipSpriteSheet.sprites.smoke_stack;
+    static moduleName = 'Steam Stack';
+    static description = 'Must be built above a boiler';
+    static solid = false;
+
+    weight = 8;
+
+    static canBuildAt(modX, modY) {
+        const mod = state.ship.getModule(modX, modY - 1, BoilerModule);
+        return mod && mod.solid;
+    }
+
+    tick() {
+        super.tick();
+
+        const boiler = this.ship.getModule(this.x, this.y - 1, BoilerModule);
+        if (boiler && boiler.isGeneratingSteam && Math.random() < .5) {
+            emitParticle(BoilerSteamParticle, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+        }
+    }
+}
+
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule, SmokeStackModule];
 
 
 class Ship extends Entity {

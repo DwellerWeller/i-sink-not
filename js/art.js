@@ -84,7 +84,7 @@ shipSpriteSheet.createSprite('steam_puff', 513, 59, 64, 71, 32, 35);
 shipSpriteSheet.createSprite('water_spray', 500, 203, 94, 143, 47, 72);
 shipSpriteSheet.createSprite('boiler', 37, 443, 176, 136, 30, 6);
 shipSpriteSheet.createSprite('boiler_lit_window', 235, 545, 52, 56, -8, -52);
-shipSpriteSheet.createSprite('smoke_stack', 613, 26, 144, 262);
+shipSpriteSheet.createSprite('smoke_stack', 613, 26, 144, 262, 10, 120);
 shipSpriteSheet.createSprite('fin_sail', 240, 315, 151, 215, 20, 70);
 shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76);
 shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86);
