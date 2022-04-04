@@ -303,11 +303,8 @@ class GameController extends Entity {
 
         // pause
         if (state.gameRunning && state.paused) {
-            ctx.textAlign = 'center';
-            ctx.font = `64px ${FONT_STACK}`;
-            const pauseText = 'PAUSED';
-            const pauseTextMetrics = ctx.measureText(pauseText);
-            ctx.fillText(pauseText, CANVAS_WIDTH/2, 200);
+            ctx.fillRect(15, 15, 10, 30);
+            ctx.fillRect(35, 15, 10, 30);
         }
 
         ctx.textAlign = 'left';
