@@ -295,6 +295,7 @@ class ShipModule extends Entity {
     }
 
     sprite = null;
+    icon = null;
     health = 10;
     baseFragility = 0;
 
@@ -358,6 +359,8 @@ class ShipModule extends Entity {
     onFixed() {}
 
     tick(timeSinceLastTick) {
+        this.icon = null;
+
         if (this.percentSubmerged > 0 && Math.random() < (state.speed / 10)) {
             const spriteX = this.globalX + (Math.random() * SHIP_MODULE_WIDTH);
             const spriteY = CANVAS_HEIGHT - currentWaterHeight + getWaterBob();
@@ -380,6 +383,10 @@ class ShipModule extends Entity {
                 this.damageLevel = 'normal';
                 this.onFixed();
             }
+        }
+
+        if (this.damageLevel === 'broken' && this.percentSubmerged > .5) {
+            this.icon = shipSpriteSheet.sprites.hammer_icon;
         }
     }
 
@@ -1075,6 +1082,31 @@ class DebugDisplay extends Entity {
     }
 }
 
+class ShipUI extends Entity {
+    zIndex = 200;
+
+    constructor(ship) {
+        super();
+        this.ship = ship;
+    }
+
+    render() {
+        if (!this.ship.updating || !state.gameRunning) return;
+
+        for (let y = 0; y < this.ship.rows; y++) {
+            for (let x = 0; x < this.ship.columns; x++) {
+                const shipModule = this.ship.getModule(x, y);
+                if (shipModule && shipModule.icon) {
+                    const spriteX = shipModule.globalX + (SHIP_MODULE_WIDTH / 2);
+                    const spriteY = shipModule.globalY - (SHIP_MODULE_HEIGHT / 2)
+                    shipSpriteSheet.sprites.icon_bg.draw(ctx, spriteX, spriteY);
+                    shipModule.icon.draw(ctx, spriteX, spriteY);
+                }
+            }
+        }
+    }
+}
+
 function emitParticle(ParticleClass, life, x, y) {
     entities.push(
         new ParticleClass(performance.now() + life, x, y),
@@ -1371,6 +1403,7 @@ export function setUp(canvasEl_) {
     entities.push(new Water(10, 1, .1, 0));
 
     entities.push(ship);
+    entities.push(new ShipUI(ship));
 
     const foregroundWater = new Water(0, .5, .15, -150);
     foregroundWater.zIndex = 100;

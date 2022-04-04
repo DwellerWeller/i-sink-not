@@ -86,10 +86,10 @@ shipSpriteSheet.createSprite('boiler', 37, 443, 176, 136, 30, 6);
 shipSpriteSheet.createSprite('boiler_lit_window', 235, 545, 52, 56, -8, -52);
 shipSpriteSheet.createSprite('smoke_stack', 613, 26, 144, 262, 10, 120);
 shipSpriteSheet.createSprite('fin_sail', 240, 315, 151, 215, 20, 70);
-shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76);
-shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86);
-shipSpriteSheet.createSprite('watch_icon', 408, 517, 85, 64);
-shipSpriteSheet.createSprite('oar_icon', 505, 632, 75, 79);
+shipSpriteSheet.createSprite('bucket_icon', 507, 375, 76, 76, 38, 38);
+shipSpriteSheet.createSprite('hammer_icon', 502, 504, 80, 86, 40, 43);
+shipSpriteSheet.createSprite('watch_icon', 408, 517, 85, 64, 42, 32);
+shipSpriteSheet.createSprite('oar_icon', 505, 632, 75, 79, 37, 39);
 shipSpriteSheet.createSprite('wind_1', 630, 315, 139, 30);
 shipSpriteSheet.createSprite('wind_2', 633, 361, 134, 33);
 shipSpriteSheet.createSprite('wind_3', 641, 401, 123, 30);
@@ -108,7 +108,7 @@ shipSpriteSheet.createSprite('balloon_top', 607, 742, 251, 239, 60, 160);
 shipSpriteSheet.createSprite('castle', 799, 309, 195, 175, 32, 32);
 shipSpriteSheet.createSprite('square_outline', 737, 600, 116, 119, -8, -8);
 shipSpriteSheet.createSprite('square_bg', 611, 598, 113, 117, -8, -8);
-shipSpriteSheet.createSprite('circle_bg', 459, 757, 72, 74);
+shipSpriteSheet.createSprite('icon_bg', 459, 757, 72, 74, 36, 37);
 
 
 window.shipSpriteSheet = shipSpriteSheet;
