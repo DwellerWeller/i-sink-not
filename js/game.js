@@ -1,7 +1,7 @@
 import * as end from './end.js';
 import * as sound from './sound.js';
 
-import { shipSpriteSheet, AnimatedSpriteController, islandSpriteSheet } from './art.js';
+import { shipSpriteSheet, AnimatedSpriteController, islandSpriteSheet, images, imageLoader } from './art.js';
 
 let canvasEl;
 let ctx;
@@ -265,9 +265,9 @@ class GameController extends Entity {
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         // bg parallax
-        drawParallax(window.parallaxBgYellow, .01, 0, -200);
-        drawParallax(window.parallaxBgOrange, .03, 0, -400);
-        drawParallax(window.parallaxBgRed, .05, 0, -800);
+        drawParallax(images.parallaxBgYellow, .01, 0, -200);
+        drawParallax(images.parallaxBgOrange, .03, 0, -400);
+        drawParallax(images.parallaxBgRed, .05, 0, -800);
 
         // TODO move into separate entity
         if (!state.ship.updating) return;
@@ -1152,8 +1152,8 @@ class Water extends Entity {
     render(now) {
         ctx.globalAlpha = this.alpha;
         const yPosition = CANVAS_HEIGHT - this.height - 75 - currentWaterHeight + getWaterBob();
-        drawParallax(window.wavesImg, this.parallaxSpeed, this.x_offset, yPosition);
-        const imgHeight = wavesImg.height;
+        drawParallax(images.wavesImg, this.parallaxSpeed, this.x_offset, yPosition);
+        const imgHeight = images.wavesImg.height;
         if (yPosition + imgHeight < CANVAS_HEIGHT) {
             ctx.fillStyle = '#96b3d1';
             ctx.fillRect(0, Math.max(0, yPosition + imgHeight), CANVAS_WIDTH, CANVAS_HEIGHT);

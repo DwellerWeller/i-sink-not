@@ -1,4 +1,3 @@
-
 function loadImage(url) {
     return new Promise(resolve => {
         const img = new Image();
@@ -116,25 +115,21 @@ shipSpriteSheet.createSprite('icon_bg', 459, 757, 72, 74, 36, 37);
 
 window.shipSpriteSheet = shipSpriteSheet;
 
-const parallaxBgRed = await loadImage('art/parallax bg red.png');
+const parallaxBgRed = loadImage('art/parallax bg red.png').then(img => images.parallaxBgRed = img);
+const parallaxBgOrange = loadImage('art/parallax bg orange.png').then(img => images.parallaxBgOrange = img);
+const parallaxBgYellow = loadImage('art/parallax bg yellow.png').then(img => images.parallaxBgYellow = img);
+const wavesImg = loadImage('art/waves.png').then(img => images.wavesImg = img);
+const playImg = loadImage('art/play.png').then(img => images.playImg = img);
 
-window.parallaxBgRed = parallaxBgRed;
+export const images = {};
 
-const parallaxBgOrange = await loadImage('art/parallax bg orange.png');
+export const imageLoader = Promise.all([parallaxBgOrange, parallaxBgRed, parallaxBgYellow, wavesImg, playImg]);
 
-window.parallaxBgOrange = parallaxBgOrange;
-
-const parallaxBgYellow = await loadImage('art/parallax bg yellow.png');
-
-window.parallaxBgYellow = parallaxBgYellow;
-
-const wavesImg = await loadImage('art/waves.png');
-
-window.wavesImg = wavesImg;
-
-const playImg = await loadImage('art/play.png');
-
-window.playImg = playImg;
+// window.parallaxBgRed = parallaxBgRed;
+// window.parallaxBgOrange = parallaxBgOrange;
+// window.parallaxBgYellow = parallaxBgYellow;
+// window.wavesImg = wavesImg;
+// window.playImg = playImg;
 
 const islandSpriteSheet = new SpriteSheet('art/island-spritesheet.png');
 
