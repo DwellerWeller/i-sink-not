@@ -925,10 +925,7 @@ FinSailModule.moduleName = 'Fin sail';
 FinSailModule.description = 'Makes you go';
 
 class CastleModule extends ShipModule {
-    constructor(ship, x, y) {
-        super(ship, x, y);
-        this.weight = 20;
-    }
+    get weight() { return 20; }
 
     static canBuildAt(modX, modY) {
         const mod = state.ship.getModule(modX, modY - 1);
@@ -947,9 +944,10 @@ class SmokeStackModule extends ShipModule {
     
     constructor(ship, x, y) {
         super(ship, x, y);
-        this.weight = 8;
         this.boiler = ship.getModule(x, y-1);
     }
+
+    get weight() { return 8; }
 
     tick(timeSinceLastTick) {
         super.tick();
