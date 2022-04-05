@@ -43,11 +43,13 @@ const VECTOR_DOWN = { x: 0, y: 1 };
 const VECTOR_LEFT = { x: -1, y: 1 };
 
 class Entity {
-    visible = true;
-    updating = true;
-    alive = true;
-    zIndex = 0;
-    canClickWhilePaused = false;
+    constructor() {
+        this.visible = true;
+        this.updating = true;
+        this.alive = true;
+        this.zIndex = 0;
+        this.canClickWhilePaused = false;
+    }
 
     render(now) {}
     tick(timeSinceLastTick, now) {}
@@ -67,29 +69,28 @@ const entities = [];
 /* game state */
 
 class State {
-    debug = false;
-    gameRunning = true;
-    paused = false;
-    paused_time = 0;
-    shipDraught = 10;
-    timeAfloat = 0;
-    distanceTraveled = 0;
-
-    // A higher-resolution version of distanceTraveled.  It won't match exactly though,
-    // since it's for rendering the background.  It just has to look reasonably nice.
-    bgDistanceTraveled = 0;
-
-    speed = 0;
-    cooldown = 0;
-    currentCallback = null;
-    timeElapsed = 0;
-
-    hoveredEntity = null;
-
-    currentMouseX = -1;
-    currentMouseY = -1;
-    
     constructor(ship) {
+        this.debug = false;
+        this.gameRunning = true;
+        this.paused = false;
+        this.paused_time = 0;
+        this.shipDraught = 10;
+        this.timeAfloat = 0;
+        this.distanceTraveled = 0;
+    
+        // A higher-resolution version of distanceTraveled.  It won't match exactly though,
+        // since it's for rendering the background.  It just has to look reasonably nice.
+        this.bgDistanceTraveled = 0;
+    
+        this.speed = 0;
+        this.cooldown = 0;
+        this.currentCallback = null;
+        this.timeElapsed = 0;
+    
+        this.hoveredEntity = null;
+    
+        this.currentMouseX = -1;
+        this.currentMouseY = -1;
         this.ship = ship;
     }
 
@@ -316,10 +317,9 @@ class GameController extends Entity {
 }
 
 class Island extends Entity {
-    scale = 1.5;
-
     constructor(sprite, startingPoint) {
         super();
+        this.scale = 1.5;
         this.sprite = sprite;
         this.startingPoint = startingPoint;
     }
@@ -339,9 +339,12 @@ class Island extends Entity {
 }
 
 class IslandController extends Entity {
-    islands = islandSpriteSheet.getAllSprites();
-    spawnInterval = 500;
-    islandsSpawned = 0;
+    constructor() {
+        super();
+        this.islands = islandSpriteSheet.getAllSprites();
+        this.spawnInterval = 500;
+        this.islandsSpawned = 0;
+    }
 
     tick() {
         const intervals = Math.floor(state.distanceTraveled / this.spawnInterval);
@@ -357,19 +360,18 @@ const SHIP_MODULE_HEIGHT = 128;
 const SHIP_MODULE_WIDTH = 128;
 
 class ShipModule extends Entity {
-    static solid = true;
     static canBuildAt(x, y) { return true; }
 
     get solid() {
         return this.constructor.solid;
     }
 
-    sprite = null;
-    icon = null;
-    health = 10;
-
+    
     constructor(ship, x, y) {
         super();
+        this.sprite = null;
+        this.icon = null;
+        this.health = 10;
         this.ship = ship;
         // x and y here are coordinates in the ship's grid, not relative to canvas!
         this.x = x;
@@ -474,28 +476,20 @@ class ShipModule extends Entity {
         }
     }
 }
+ShipModule.solid = true;
 
-class HullModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.hull;
-
-    static moduleName = 'Hull';
-    static description = 'Makes you float';
-
-    sprite = HullModule.sprite;
-
-    defaultSprite = shipSpriteSheet.sprites.hull;
-    bustedSprite = shipSpriteSheet.sprites.busted_hull;
-    topHullSprite = shipSpriteSheet.sprites.top_hull;
-    sideHullSprite = shipSpriteSheet.sprites.side_hull;
-
-    renderTopHull = false;
-    renderLeftHull = false;
-
-    floodAmount = 0;
-    buoyancy = 20;
-
+class HullModule extends ShipModule { 
     constructor(ship, x, y) {
         super(ship, x, y);
+        this.sprite = HullModule.sprite;
+        this.defaultSprite = shipSpriteSheet.sprites.hull;
+        this.bustedSprite = shipSpriteSheet.sprites.busted_hull;
+        this.topHullSprite = shipSpriteSheet.sprites.top_hull;
+        this.sideHullSprite = shipSpriteSheet.sprites.side_hull;
+        this.renderTopHull = false;
+        this.renderLeftHull = false;
+        this.floodAmount = 0;
+        this.buoyancy = 20;
         this.updateDisplay();
     }
 
@@ -588,18 +582,16 @@ class HullModule extends ShipModule {
         this.renderLeftHull = !!this.ship.getModule(this.x - 1, this.y, HullModule);
     }
 }
+HullModule.sprite = shipSpriteSheet.sprites.hull;
+HullModule.moduleName = 'Hull';
+HullModule.description = 'Makes you float';
 
 class NullModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.square_bg;
-    static outlineSprite = shipSpriteSheet.sprites.square_outline;
-    static solid = false;
-    
-    showOutline = false;
-    showBackground = false;
-    buildOptions = [];
-
     constructor(ship, x, y) {
         super(ship, x, y);
+        this.showOutline = false;
+        this.showBackground = false;
+        this.buildOptions = [];
         this.updateDisplay();
     }
 
@@ -713,17 +705,11 @@ class NullModule extends ShipModule {
 
     tick() {}
 }
+NullModule.sprite = shipSpriteSheet.sprites.square_bg;
+NullModule.outlineSprite = shipSpriteSheet.sprites.square_outline;
+NullModule.solid = false;
 
 class ConstructionModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.scaffolding;
-    static solid = false;
-
-    static BITS = [
-        shipSpriteSheet.sprites.bit_screw,
-        shipSpriteSheet.sprites.bit_wood,
-        shipSpriteSheet.sprites.bit_plate,
-    ]
-
     tick() {
         if (Math.random() < .3) {
             const p = emitParticle(BitParticle, 700, this.globalX + Math.random() * SHIP_MODULE_WIDTH, this.globalY - (Math.random() * SHIP_MODULE_HEIGHT/2));
@@ -731,13 +717,15 @@ class ConstructionModule extends ShipModule {
         }
     }
 }
+ConstructionModule.sprite = shipSpriteSheet.sprites.scaffolding;
+ConstructionModule.solid = false;
+ConstructionModule.BITS = [
+    shipSpriteSheet.sprites.bit_screw,
+    shipSpriteSheet.sprites.bit_wood,
+    shipSpriteSheet.sprites.bit_plate,
+];
 
 class SailModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.sail;
-    static moduleName = 'Sail';
-    static description = 'Makes you go';
-    static solid = false;
-
     get weight() {
         return 1.5;
     }
@@ -761,14 +749,12 @@ class SailModule extends ShipModule {
         }
     }
 }
+SailModule.sprite = shipSpriteSheet.sprites.sail;
+SailModule.moduleName = 'Sail';
+SailModule.description = 'Makes you go';
+SailModule.solid = false;
 
 class BoilerModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.boiler;
-    static windowSprite = shipSpriteSheet.sprites.boiler_lit_window;
-
-    static moduleName = 'Boiler';
-    static description = 'Provides steam for propellors and balloons';
-
     constructor(ship, x, y) {
         super(ship, x, y);
         this.hasSmokeStack = null;
@@ -833,20 +819,16 @@ class BoilerModule extends ShipModule {
         }
     }
 }
+BoilerModule.sprite = shipSpriteSheet.sprites.boiler;
+BoilerModule.windowSprite = shipSpriteSheet.sprites.boiler_lit_window;
+BoilerModule.moduleName = 'Boiler';
+BoilerModule.description = 'Provides steam for propellors and balloons';
 
 class PropellerModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.propeller;
-    static moduleName = 'Propellor';
-    static description = 'Makes you go <i>fast</i>. Must be attached to a functioning boiler';
-    static solid = false;
-
-    static blurSprites = [
-        shipSpriteSheet.sprites.propeller_blur_1,
-        shipSpriteSheet.sprites.propeller_blur_2,
-    ];
-
-    blurSprite = new AnimatedSpriteController(PropellerModule.blurSprites, performance.now());
-
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.blurSprite = new AnimatedSpriteController(PropellerModule.blurSprites, performance.now());
+    }
 
     get weight() {
         return 2;
@@ -881,16 +863,17 @@ class PropellerModule extends ShipModule {
         }
     }
 }
+PropellerModule.sprite = shipSpriteSheet.sprites.propeller;
+PropellerModule.moduleName = 'Propellor';
+PropellerModule.description = 'Makes you go <i>fast</i>. Must be attached to a functioning boiler';
+PropellerModule.solid = false;
+
+PropellerModule.blurSprites = [
+    shipSpriteSheet.sprites.propeller_blur_1,
+    shipSpriteSheet.sprites.propeller_blur_2,
+];
 
 class BalloonModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.balloon_top;
-    static baseSprite = shipSpriteSheet.sprites.balloon_base;
-
-    static moduleName = 'Balloon';
-    static description = 'Makes you go <i>up</i>. Must be attached to a functioning boiler'
-    static solid = false;
-
-
     get isInflated() {
         const moduleBelow = this.ship.getModule(this.x, this.y - 1);
         return moduleBelow.isGeneratingSteam;
@@ -914,13 +897,13 @@ class BalloonModule extends ShipModule {
         BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
 }
+BalloonModule.sprite = shipSpriteSheet.sprites.balloon_top;
+BalloonModule.baseSprite = shipSpriteSheet.sprites.balloon_base;
+BalloonModule.moduleName = 'Balloon';
+BalloonModule.description = 'Makes you go <i>up</i>. Must be attached to a functioning boiler'
+BalloonModule.solid = false;
 
 class FinSailModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.fin_sail;
-    static solid = false;
-    static moduleName = 'Fin sail';
-    static description = 'Makes you go';
-
     get weight() {
         return 2.5;
     }
@@ -936,36 +919,35 @@ class FinSailModule extends ShipModule {
         }
     }
 }
+FinSailModule.sprite = shipSpriteSheet.sprites.fin_sail;
+FinSailModule.solid = false;
+FinSailModule.moduleName = 'Fin sail';
+FinSailModule.description = 'Makes you go';
 
 class CastleModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.castle;
-
-    static moduleName = 'Castle';
-    static description = 'Reinforces adjacent hulls (and looks really cool)';
-    
-    weight = 20;
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        this.weight = 20;
+    }
 
     static canBuildAt(modX, modY) {
         const mod = state.ship.getModule(modX, modY - 1);
         return mod && mod.solid;
     }
 }
+CastleModule.sprite = shipSpriteSheet.sprites.castle;
+CastleModule.moduleName = 'Castle';
+CastleModule.description = 'Reinforces adjacent hulls (and looks really cool)';
 
-class SmokeStackModule extends ShipModule {
-    static sprite = shipSpriteSheet.sprites.smoke_stack;
-    static moduleName = 'Smoke Stack';
-    static description = 'Makes boilers more resilient';
-    static solid = false;
-
-    weight = 8;
-
+class SmokeStackModule extends ShipModule {    
     static canBuildAt(modX, modY) {
         const mod = state.ship.getModule(modX, modY - 1, BoilerModule);
         return mod && mod.solid;
     }
-
+    
     constructor(ship, x, y) {
         super(ship, x, y);
+        this.weight = 8;
         this.boiler = ship.getModule(x, y-1);
     }
 
@@ -977,18 +959,20 @@ class SmokeStackModule extends ShipModule {
         }
     }
 }
+SmokeStackModule.sprite = shipSpriteSheet.sprites.smoke_stack;
+SmokeStackModule.moduleName = 'Smoke Stack';
+SmokeStackModule.description = 'Makes boilers more resilient';
+SmokeStackModule.solid = false;
 
 const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule, SmokeStackModule];
 
-
 class Ship extends Entity {
-    columns = 5;
-    rows = 1;
-    zIndex = 10;
-    modules = [];
-
     constructor() {
         super();
+        this.columns = 5;
+        this.rows = 1;
+        this.zIndex = 10;
+        this.modules = [];
         const ship = this;
         this.box = {
             // position is anchored to the bottom left corner of the ship
@@ -1158,10 +1142,9 @@ class Ship extends Entity {
 }
 
 class Water extends Entity {
-    zIndex = 1;
-
     constructor(height, alpha, parallaxSpeed, x_offset) {
         super();
+        this.zIndex = 1;
         this.height = height;
         this.alpha = alpha;
         this.parallaxSpeed = parallaxSpeed;
@@ -1207,10 +1190,9 @@ class DebugDisplay extends Entity {
 }
 
 class ShipUI extends Entity {
-    zIndex = 200;
-
     constructor(ship) {
         super();
+        this.zIndex = 200;
         this.ship = ship;
     }
 
@@ -1238,15 +1220,14 @@ function emitParticle(ParticleClass, life, x, y) {
 }
 
 class Particle extends Entity {
-    speed = 3;
-    forceVector = scaleVector(cloneVector(VECTOR_UP), .5);
-    direction = cloneVector(VECTOR_UP);
-    sprite = null;
-    zIndex = 20;
-    fade = 1;
-    
     constructor(liveUntil, x, y) {
         super();
+        this.speed = 3;
+        this.forceVector = scaleVector(cloneVector(VECTOR_UP), .5);
+        this.direction = cloneVector(VECTOR_UP);
+        this.sprite = null;
+        this.zIndex = 20;
+        this.fade = 1;
         this.created = performance.now();
         this.liveUntil = liveUntil;
         this.x = x;
@@ -1286,22 +1267,27 @@ class Particle extends Entity {
 
 
 class BitParticle extends Particle {
-    forceVector = scaleVector(cloneVector(VECTOR_DOWN), .5);
-    direction = normalizeVector({
-        x: (Math.random() * 2) - 1,
-        y: -1,
-    });
-    speed = 5;
-    fade = 0;
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.forceVector = scaleVector(cloneVector(VECTOR_DOWN), .5);
+        this.direction = normalizeVector({
+            x: (Math.random() * 2) - 1,
+            y: -1,
+        });
+        this.speed = 5;
+        this.fade = 0;
+    }
 }
 
 class SteamParticle extends Particle {
-    sprite = shipSpriteSheet.sprites.steam_puff;
-
-    direction = normalizeVector({
-        x: (Math.random() * 2) - 1,
-        y: (Math.random() * 2) - 1,
-    });
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.sprite = shipSpriteSheet.sprites.steam_puff;
+        this.direction = normalizeVector({
+            x: (Math.random() * 2) - 1,
+            y: (Math.random() * 2) - 1,
+        });
+    }
 
     tick(deltaT, t) {
         super.tick(deltaT, t);
@@ -1310,46 +1296,56 @@ class SteamParticle extends Particle {
 }
 
 class BoilerSteamParticle extends SteamParticle {
-    direction = normalizeVector({
-        x: (Math.random() * 2) - 1,
-        y: -1,
-    });
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.direction = normalizeVector({
+            x: (Math.random() * 2) - 1,
+            y: -1,
+        });
+    }
 }
 
 class BoilerSmokeParticle extends BoilerSteamParticle {
-    sprite = shipSpriteSheet.sprites.smoke_puff;
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.sprite = shipSpriteSheet.sprites.smoke_puff;
+    }
 }
 
 class SprayParticle extends Particle {
-    sprite = shipSpriteSheet.sprites.water_spray;
-    forceVector = VECTOR_DOWN;
-    speed = 5;
-
-    direction = normalizeVector({
-        x: -Math.random(),
-        y: -1,
-    });
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.sprite = shipSpriteSheet.sprites.water_spray;
+        this.forceVector = VECTOR_DOWN;
+        this.speed = 5;
+        this.direction = normalizeVector({
+            x: -Math.random(),
+            y: -1,
+        });
+    }
 }
 
 class WindParticle extends Particle {
-    static sprites = [
-        shipSpriteSheet.sprites.wind_1,
-        shipSpriteSheet.sprites.wind_2,
-        shipSpriteSheet.sprites.wind_3,
-        shipSpriteSheet.sprites.wind_4,
-    ];
+    constructor(liveUntil, x, y) {
+        super(liveUntil, x, y);
+        this.sprite = new AnimatedSpriteController(WindParticle.sprites, performance.now());
 
-    sprite = new AnimatedSpriteController(WindParticle.sprites, performance.now());
-
-    forceVector = null;
-    direction = cloneVector(VECTOR_LEFT);
-    speed = 1;
+        this.forceVector = null;
+        this.direction = cloneVector(VECTOR_LEFT);
+        this.speed = 1;
+    }
 
     tick(deltaT, t) {
         super.tick(deltaT, t);
         this.x -= state.speed;
     }
 }
+WindParticle.sprites = [
+    shipSpriteSheet.sprites.wind_1,
+    shipSpriteSheet.sprites.wind_2,
+    shipSpriteSheet.sprites.wind_3,
+    shipSpriteSheet.sprites.wind_4,
+];
 
 let previousTick;
 let tickTimer;
@@ -1395,10 +1391,13 @@ function bezier(t)
 }
 
 class TitleScreen extends Entity {
-    zIndex = 1000;
-    canClickWhilePaused = true;
-    fadeStart = 0;
-    fadeUntil = 0;
+    constructor() {
+        super();
+        this.zIndex = 1000;
+        this.canClickWhilePaused = true;
+        this.fadeStart = 0;
+        this.fadeUntil = 0;
+    }
 
     checkClick(x, y) { return this; }
 
@@ -1476,11 +1475,9 @@ class TitleScreen extends Entity {
 }
 
 class Fish extends Entity {
-    zIndex = 2000;
-    static sprite = shipSpriteSheet.sprites.bit_fish;
-
     constructor() {
         super();
+        this.zIndex = 2000;
 
         this.depth = CANVAS_HEIGHT + currentWaterHeight + Fish.sprite.height;
 
@@ -1510,16 +1507,14 @@ class Fish extends Entity {
             Fish.sprite.draw(ctx, this.x, this.depth - currentWaterHeight);
         }
     }
-
 }
+Fish.sprite = shipSpriteSheet.sprites.bit_fish;
 
 class Bubble extends Entity {
-    zIndex = 2000;
-    static sprite = shipSpriteSheet.sprites.bit_bubble;
-
     constructor() {
         super();
-
+        
+        this.zIndex = 2000;
         this.depth = CANVAS_HEIGHT + currentWaterHeight + Bubble.sprite.height;
         this.x = Math.random() * CANVAS_WIDTH;
     }
@@ -1536,15 +1531,14 @@ class Bubble extends Entity {
 
         Bubble.sprite.draw(ctx, this.x, this.depth - currentWaterHeight);
     }
-
 }
+Bubble.sprite = shipSpriteSheet.sprites.bit_bubble;
 
 class GameOverScreen extends Entity {
-    zIndex = 1000;
-    canClickWhilePaused = true;
-
     constructor(timeElapsed) {
         super();
+        this.zIndex = 1000;
+        this.canClickWhilePaused = true;
         this.timeElapsed = timeElapsed;
         this.fishCountdown = 2 * 1000;
         this.bubbleCountdown = 3 * 1000;

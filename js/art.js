@@ -40,10 +40,9 @@ class Sprite {
 }
 
 class SpriteSheet {
-    sprites = {};
-
     constructor(src) {
         this.src = src;
+        this.sprites = {};
         loadImage(src).then(img => this.img = img);
     }
 
