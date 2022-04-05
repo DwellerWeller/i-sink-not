@@ -367,7 +367,6 @@ class ShipModule extends Entity {
     sprite = null;
     icon = null;
     health = 10;
-    baseFragility = 0;
 
     constructor(ship, x, y) {
         super();
@@ -386,21 +385,7 @@ class ShipModule extends Entity {
     }
 
     get fragility() {
-        if (this.baseFragility == 0) return 0;
-
-        for (let i = -1; i < 2; i++) {
-            for (let j = -1; j < 2; j++) {
-                if (j == 0 || i == 0) { // don't count diagonals
-                    if (i == 0 && j == 0) continue; // don't count self
-                    const adjacentModule = this.ship.getModule(this.x + i, this.y + j);
-                    if (adjacentModule && adjacentModule.constructor.name == 'CastleModule') {
-                        return this.baseFragility * .5;
-                    }
-                }
-            }
-        }
-
-        return this.baseFragility;
+        return 0;
     }
 
     get percentSubmerged() {
@@ -509,8 +494,6 @@ class HullModule extends ShipModule {
     floodAmount = 0;
     buoyancy = 20;
 
-    baseFragility = 1;
-
     constructor(ship, x, y) {
         super(ship, x, y);
         this.updateDisplay();
@@ -527,6 +510,22 @@ class HullModule extends ShipModule {
         if (right && right.solid) return true;
 
         return false;
+    }
+
+    get fragility() {
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                if (j == 0 || i == 0) { // don't count diagonals
+                    if (i == 0 && j == 0) continue; // don't count self
+                    const adjacentModule = this.ship.getModule(this.x + i, this.y + j);
+                    if (adjacentModule && adjacentModule.constructor.name == 'CastleModule') {
+                        return .5;
+                    }
+                }
+            }
+        }
+
+        return 1;
     }
 
     tick(timeSinceLastTick, now) {
@@ -770,8 +769,6 @@ class BoilerModule extends ShipModule {
     static moduleName = 'Boiler';
     static description = 'Provides steam for propellors and balloons';
 
-    baseFragility = 1;
-
     constructor(ship, x, y) {
         super(ship, x, y);
         this.hasSmokeStack = null;
@@ -779,6 +776,10 @@ class BoilerModule extends ShipModule {
 
     get weight() {
         return 10;
+    }
+
+    get fragility() {
+        return this.hasSmokeStack ? .5 : 1;
     }
 
     static canBuildAt(modX, modY) { 
@@ -940,7 +941,7 @@ class CastleModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.castle;
 
     static moduleName = 'Castle';
-    static description = 'Reinforces adjacent modules (and looks really cool)';
+    static description = 'Reinforces adjacent hulls (and looks really cool)';
     
     weight = 20;
 
@@ -953,7 +954,7 @@ class CastleModule extends ShipModule {
 class SmokeStackModule extends ShipModule {
     static sprite = shipSpriteSheet.sprites.smoke_stack;
     static moduleName = 'Smoke Stack';
-    static description = 'Get that smoke outta here';
+    static description = 'Makes boilers more resilient';
     static solid = false;
 
     weight = 8;
