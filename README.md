@@ -9,4 +9,4 @@ is "Delay the inevitable".
 [**Play here**][play]
 
 [ld50]: https://ldjam.com/events/ludum-dare/50
-[play]: https://dwellerweller.github.io/i-sink-not/
+[play]: https://welldweller.github.io/i-sink-not/
