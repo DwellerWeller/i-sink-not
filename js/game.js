@@ -962,7 +962,30 @@ SmokeStackModule.moduleName = 'Smoke Stack';
 SmokeStackModule.description = 'Makes boilers more resilient';
 SmokeStackModule.solid = false;
 
-const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule, SmokeStackModule];
+class SupportModule extends ShipModule {
+    static canBuildAt(modX, modY) {
+        const left = state.ship.getModule(modX - 1, modY);
+        if (left && left.solid) return true;
+        const right = state.ship.getModule(modX + 1, modY);
+        return right && right.solid;
+    }
+
+    constructor(ship, x, y) {
+        super(ship, x, y);
+        const leftMod = ship.getModule(x - 1, y);
+        this.isRightSupport = leftMod && leftMod.solid;
+        this.sprite = this.isRightSupport ? SupportModule.sprite : SupportModule.leftSprite;
+    }
+
+    get weight() { return 1; }
+}
+SupportModule.sprite = spriteController.sprites.support_right;
+SupportModule.leftSprite = spriteController.sprites.support_left;
+SupportModule.moduleName = 'Structural Support';
+SupportModule.description = 'Allows constructing even more ship modules!';
+SupportModule.solid = true;
+
+const moduleTypes = [HullModule, SailModule, BoilerModule, PropellerModule, FinSailModule, BalloonModule, CastleModule, SmokeStackModule, SupportModule];
 
 class Ship extends Entity {
     constructor() {

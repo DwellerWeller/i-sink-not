@@ -131,8 +131,8 @@ shipSpriteSheet.createSprite('icon_bg', 459, 757, 72, 74, 36, 37);
 const shipSpriteSheet2 = new SpriteSheet('art/ship-spritesheet-2.png');
 
 shipSpriteSheet2.createSprite('figurehead', 13, 10, 55, 123);
-shipSpriteSheet2.createSprite('support_right', 81, 6, 150, 142);
-shipSpriteSheet2.createSprite('support_left', 248, 10, 150, 142);
+shipSpriteSheet2.createSprite('support_right', 81, 6, 150, 142, 20, 10);
+shipSpriteSheet2.createSprite('support_left', 248, 10, 150, 142, 0, 10);
 shipSpriteSheet2.createSprite('wing_background', 416, 5, 215, 151);
 shipSpriteSheet2.createSprite('wing_foreground', 415, 175, 215, 161);
 shipSpriteSheet2.createSprite('keel', 16, 164, 122, 45);
