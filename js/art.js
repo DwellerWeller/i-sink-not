@@ -90,9 +90,9 @@ class SpriteController {
 const shipSpriteSheet = new SpriteSheet('art/ship-spritesheet.png');
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
-shipSpriteSheet.createSprite('hull', 42, 824, 184, 146, 28, 8);
-shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
-shipSpriteSheet.createSprite('side_hull', 304, 872, 98, 94, 98, -44);
+// shipSpriteSheet.createSprite('hull', 42, 824, 184, 146, 28, 8);
+// shipSpriteSheet.createSprite('top_hull', 34, 628, 185, 116, 28, 15);
+// shipSpriteSheet.createSprite('side_hull', 304, 872, 98, 94, 98, -44);
 shipSpriteSheet.createSprite('busted_hull', 233, 629, 184, 146, 28, 8);
 shipSpriteSheet.createSprite('scaffolding', 430, 852, 165, 112, 20, -20);
 shipSpriteSheet.createSprite('propeller', 67, 63, 79, 199, 10, 66);
@@ -128,7 +128,20 @@ shipSpriteSheet.createSprite('square_outline', 737, 600, 116, 119, -8, -8);
 shipSpriteSheet.createSprite('square_bg', 611, 598, 113, 117, -8, -8);
 shipSpriteSheet.createSprite('icon_bg', 459, 757, 72, 74, 36, 37);
 
-window.shipSpriteSheet = shipSpriteSheet;
+const shipSpriteSheet2 = new SpriteSheet('art/ship-spritesheet-2.png');
+
+shipSpriteSheet2.createSprite('figurehead', 13, 10, 55, 123);
+shipSpriteSheet2.createSprite('support_right', 81, 6, 150, 142);
+shipSpriteSheet2.createSprite('support_left', 248, 10, 150, 142);
+shipSpriteSheet2.createSprite('wing_background', 416, 5, 215, 151);
+shipSpriteSheet2.createSprite('wing_foreground', 415, 175, 215, 161);
+shipSpriteSheet2.createSprite('keel', 16, 164, 122, 45);
+shipSpriteSheet2.createSprite('top_hull', 17, 220, 185, 121, 30, 26);
+shipSpriteSheet2.createSprite('hull', 12, 354, 184, 138, 28, 8);
+shipSpriteSheet2.createSprite('half_hull', 11, 510, 184, 102, 28, 8);
+shipSpriteSheet2.createSprite('side_hull', 230, 177, 115, 105, 85, -40);
+shipSpriteSheet2.createSprite('vertical_hull_connect', 234, 311, 126, 29);
+shipSpriteSheet2.createSprite('wires_down_right', 230, 369, 108, 95);
 
 const parallaxBgRed = loadImage('art/parallax bg red.png').then(img => images.parallaxBgRed = img);
 const parallaxBgOrange = loadImage('art/parallax bg orange.png').then(img => images.parallaxBgOrange = img);
@@ -154,10 +167,11 @@ islandSpriteSheet.createSprite('medium_1', 719, 416, 257, 116);
 islandSpriteSheet.createSprite('medium_2', 685, 707, 241, 77);
 islandSpriteSheet.createSprite('large_1', 628, 871, 374, 102);
 
-window.islandSpriteSheet = islandSpriteSheet;
 
 export const spriteController = new SpriteController([
     shipSpriteSheet,
+    shipSpriteSheet2,
     islandSpriteSheet,
 ]);
 
+window.spriteController = spriteController;
