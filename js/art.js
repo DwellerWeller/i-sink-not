@@ -72,6 +72,21 @@ export class AnimatedSpriteController {
     }
 }
 
+class SpriteController {
+    constructor(spriteSheets) {
+        this.spriteSheets = spriteSheets;
+
+        // defining out of the object constructor below so this is bound correctly;
+        const get = (obj, prop) => {
+            for (let spriteSheet of this.spriteSheets) {
+                if (prop in spriteSheet.sprites) return spriteSheet.sprites[prop];
+            }
+        }
+
+        this.sprites = new Proxy({}, { get });
+    }
+}
+
 const shipSpriteSheet = new SpriteSheet('art/ship-spritesheet.png');
 
 // currently getting these numbers semi-manually by uploading the spritesheet to http://www.spritecow.com/
@@ -131,7 +146,7 @@ export const imageLoader = Promise.all([parallaxBgOrange, parallaxBgRed, paralla
 // window.wavesImg = wavesImg;
 // window.playImg = playImg;
 
-const islandSpriteSheet = new SpriteSheet('art/island-spritesheet.png');
+export const islandSpriteSheet = new SpriteSheet('art/island-spritesheet.png');
 
 islandSpriteSheet.createSprite('small_1', 606, 593, 146, 67);
 islandSpriteSheet.createSprite('small_2', 807, 591, 110, 69);
@@ -141,5 +156,8 @@ islandSpriteSheet.createSprite('large_1', 628, 871, 374, 102);
 
 window.islandSpriteSheet = islandSpriteSheet;
 
-export { shipSpriteSheet, islandSpriteSheet };
+export const spriteController = new SpriteController([
+    shipSpriteSheet,
+    islandSpriteSheet,
+]);
 

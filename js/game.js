@@ -1,7 +1,7 @@
 import * as end from './end.js';
 import * as sound from './sound.js';
 
-import { shipSpriteSheet, AnimatedSpriteController, islandSpriteSheet, images, imageLoader } from './art.js';
+import { spriteController, AnimatedSpriteController, images, islandSpriteSheet } from './art.js';
 
 let canvasEl;
 let ctx;
@@ -282,7 +282,7 @@ class GameController extends Entity {
         
         // distance
         let verticalOffset = textMargin;
-        const distanceIcon = shipSpriteSheet.sprites.oar_icon;
+        const distanceIcon = spriteController.sprites.oar_icon;
         distanceIcon.draw(ctx, CANVAS_WIDTH - (distanceIcon.width/2 + textMargin), distanceIcon.height/2 + verticalOffset);
         const distanceText = `${Math.floor(state.distanceTraveled)}m`;
         const textMetrics = ctx.measureText(distanceText);
@@ -290,7 +290,7 @@ class GameController extends Entity {
         verticalOffset += distanceIcon.height + textMargin;
         
         // time
-        const timeIcon = shipSpriteSheet.sprites.watch_icon;
+        const timeIcon = spriteController.sprites.watch_icon;
         timeIcon.draw(ctx, CANVAS_WIDTH - (timeIcon.width/2 + textMargin), timeIcon.height/2 + verticalOffset);
         const secondsAfloat = Math.floor(state.timeAfloat / 1000);
         const timeText = `${secondsAfloat}s`;
@@ -299,7 +299,7 @@ class GameController extends Entity {
         verticalOffset += timeIcon.height + textMargin;
         
         // modules
-        const buildIcon = shipSpriteSheet.sprites.hammer_icon;
+        const buildIcon = spriteController.sprites.hammer_icon;
         buildIcon.draw(ctx, CANVAS_WIDTH - (buildIcon.width/2 + textMargin), buildIcon.height/2 + verticalOffset);
         const buildText = state.ship.moduleCount;
         const buildTextMetrics = ctx.measureText(buildText);
@@ -443,7 +443,7 @@ class ShipModule extends Entity {
         }
 
         if (this.damageLevel === 'broken' && isEntityInteractive(this) && this.percentSubmerged < 1) {
-            this.icon = shipSpriteSheet.sprites.hammer_icon;
+            this.icon = spriteController.sprites.hammer_icon;
         }
     }
 
@@ -482,10 +482,10 @@ class HullModule extends ShipModule {
     constructor(ship, x, y) {
         super(ship, x, y);
         this.sprite = HullModule.sprite;
-        this.defaultSprite = shipSpriteSheet.sprites.hull;
-        this.bustedSprite = shipSpriteSheet.sprites.busted_hull;
-        this.topHullSprite = shipSpriteSheet.sprites.top_hull;
-        this.sideHullSprite = shipSpriteSheet.sprites.side_hull;
+        this.defaultSprite = spriteController.sprites.hull;
+        this.bustedSprite = spriteController.sprites.busted_hull;
+        this.topHullSprite = spriteController.sprites.top_hull;
+        this.sideHullSprite = spriteController.sprites.side_hull;
         this.renderTopHull = false;
         this.renderLeftHull = false;
         this.floodAmount = 0;
@@ -582,7 +582,7 @@ class HullModule extends ShipModule {
         this.renderLeftHull = !!this.ship.getModule(this.x - 1, this.y, HullModule);
     }
 }
-HullModule.sprite = shipSpriteSheet.sprites.hull;
+HullModule.sprite = spriteController.sprites.hull;
 HullModule.moduleName = 'Hull';
 HullModule.description = 'Makes you float';
 
@@ -705,8 +705,8 @@ class NullModule extends ShipModule {
 
     tick() {}
 }
-NullModule.sprite = shipSpriteSheet.sprites.square_bg;
-NullModule.outlineSprite = shipSpriteSheet.sprites.square_outline;
+NullModule.sprite = spriteController.sprites.square_bg;
+NullModule.outlineSprite = spriteController.sprites.square_outline;
 NullModule.solid = false;
 
 class ConstructionModule extends ShipModule {
@@ -717,12 +717,12 @@ class ConstructionModule extends ShipModule {
         }
     }
 }
-ConstructionModule.sprite = shipSpriteSheet.sprites.scaffolding;
+ConstructionModule.sprite = spriteController.sprites.scaffolding;
 ConstructionModule.solid = false;
 ConstructionModule.BITS = [
-    shipSpriteSheet.sprites.bit_screw,
-    shipSpriteSheet.sprites.bit_wood,
-    shipSpriteSheet.sprites.bit_plate,
+    spriteController.sprites.bit_screw,
+    spriteController.sprites.bit_wood,
+    spriteController.sprites.bit_plate,
 ];
 
 class SailModule extends ShipModule {
@@ -749,7 +749,7 @@ class SailModule extends ShipModule {
         }
     }
 }
-SailModule.sprite = shipSpriteSheet.sprites.sail;
+SailModule.sprite = spriteController.sprites.sail;
 SailModule.moduleName = 'Sail';
 SailModule.description = 'Makes you go';
 SailModule.solid = false;
@@ -819,8 +819,8 @@ class BoilerModule extends ShipModule {
         }
     }
 }
-BoilerModule.sprite = shipSpriteSheet.sprites.boiler;
-BoilerModule.windowSprite = shipSpriteSheet.sprites.boiler_lit_window;
+BoilerModule.sprite = spriteController.sprites.boiler;
+BoilerModule.windowSprite = spriteController.sprites.boiler_lit_window;
 BoilerModule.moduleName = 'Boiler';
 BoilerModule.description = 'Provides steam for propellors and balloons';
 
@@ -863,14 +863,14 @@ class PropellerModule extends ShipModule {
         }
     }
 }
-PropellerModule.sprite = shipSpriteSheet.sprites.propeller;
+PropellerModule.sprite = spriteController.sprites.propeller;
 PropellerModule.moduleName = 'Propellor';
 PropellerModule.description = 'Makes you go <i>fast</i>. Must be attached to a functioning boiler';
 PropellerModule.solid = false;
 
 PropellerModule.blurSprites = [
-    shipSpriteSheet.sprites.propeller_blur_1,
-    shipSpriteSheet.sprites.propeller_blur_2,
+    spriteController.sprites.propeller_blur_1,
+    spriteController.sprites.propeller_blur_2,
 ];
 
 class BalloonModule extends ShipModule {
@@ -897,8 +897,8 @@ class BalloonModule extends ShipModule {
         BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
 }
-BalloonModule.sprite = shipSpriteSheet.sprites.balloon_top;
-BalloonModule.baseSprite = shipSpriteSheet.sprites.balloon_base;
+BalloonModule.sprite = spriteController.sprites.balloon_top;
+BalloonModule.baseSprite = spriteController.sprites.balloon_base;
 BalloonModule.moduleName = 'Balloon';
 BalloonModule.description = 'Makes you go <i>up</i>. Must be attached to a functioning boiler'
 BalloonModule.solid = false;
@@ -919,7 +919,7 @@ class FinSailModule extends ShipModule {
         }
     }
 }
-FinSailModule.sprite = shipSpriteSheet.sprites.fin_sail;
+FinSailModule.sprite = spriteController.sprites.fin_sail;
 FinSailModule.solid = false;
 FinSailModule.moduleName = 'Fin sail';
 FinSailModule.description = 'Makes you go';
@@ -932,7 +932,7 @@ class CastleModule extends ShipModule {
         return mod && mod.solid;
     }
 }
-CastleModule.sprite = shipSpriteSheet.sprites.castle;
+CastleModule.sprite = spriteController.sprites.castle;
 CastleModule.moduleName = 'Castle';
 CastleModule.description = 'Reinforces adjacent hulls (and looks really cool)';
 
@@ -957,7 +957,7 @@ class SmokeStackModule extends ShipModule {
         }
     }
 }
-SmokeStackModule.sprite = shipSpriteSheet.sprites.smoke_stack;
+SmokeStackModule.sprite = spriteController.sprites.smoke_stack;
 SmokeStackModule.moduleName = 'Smoke Stack';
 SmokeStackModule.description = 'Makes boilers more resilient';
 SmokeStackModule.solid = false;
@@ -1203,7 +1203,7 @@ class ShipUI extends Entity {
                 if (shipModule && shipModule.icon) {
                     const spriteX = shipModule.globalX + (SHIP_MODULE_WIDTH / 2);
                     const spriteY = shipModule.globalY - (SHIP_MODULE_HEIGHT / 2)
-                    shipSpriteSheet.sprites.icon_bg.draw(ctx, spriteX, spriteY);
+                    spriteController.sprites.icon_bg.draw(ctx, spriteX, spriteY);
                     shipModule.icon.draw(ctx, spriteX, spriteY);
                 }
             }
@@ -1280,7 +1280,7 @@ class BitParticle extends Particle {
 class SteamParticle extends Particle {
     constructor(liveUntil, x, y) {
         super(liveUntil, x, y);
-        this.sprite = shipSpriteSheet.sprites.steam_puff;
+        this.sprite = spriteController.sprites.steam_puff;
         this.direction = normalizeVector({
             x: (Math.random() * 2) - 1,
             y: (Math.random() * 2) - 1,
@@ -1306,14 +1306,14 @@ class BoilerSteamParticle extends SteamParticle {
 class BoilerSmokeParticle extends BoilerSteamParticle {
     constructor(liveUntil, x, y) {
         super(liveUntil, x, y);
-        this.sprite = shipSpriteSheet.sprites.smoke_puff;
+        this.sprite = spriteController.sprites.smoke_puff;
     }
 }
 
 class SprayParticle extends Particle {
     constructor(liveUntil, x, y) {
         super(liveUntil, x, y);
-        this.sprite = shipSpriteSheet.sprites.water_spray;
+        this.sprite = spriteController.sprites.water_spray;
         this.forceVector = VECTOR_DOWN;
         this.speed = 5;
         this.direction = normalizeVector({
@@ -1339,10 +1339,10 @@ class WindParticle extends Particle {
     }
 }
 WindParticle.sprites = [
-    shipSpriteSheet.sprites.wind_1,
-    shipSpriteSheet.sprites.wind_2,
-    shipSpriteSheet.sprites.wind_3,
-    shipSpriteSheet.sprites.wind_4,
+    spriteController.sprites.wind_1,
+    spriteController.sprites.wind_2,
+    spriteController.sprites.wind_3,
+    spriteController.sprites.wind_4,
 ];
 
 let previousTick;
@@ -1506,7 +1506,7 @@ class Fish extends Entity {
         }
     }
 }
-Fish.sprite = shipSpriteSheet.sprites.bit_fish;
+Fish.sprite = spriteController.sprites.bit_fish;
 
 class Bubble extends Entity {
     constructor() {
@@ -1530,7 +1530,7 @@ class Bubble extends Entity {
         Bubble.sprite.draw(ctx, this.x, this.depth - currentWaterHeight);
     }
 }
-Bubble.sprite = shipSpriteSheet.sprites.bit_bubble;
+Bubble.sprite = spriteController.sprites.bit_bubble;
 
 class GameOverScreen extends Entity {
     constructor(timeElapsed) {
