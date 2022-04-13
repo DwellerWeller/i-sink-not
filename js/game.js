@@ -910,7 +910,7 @@ class FinSailModule extends ShipModule {
 
     static canBuildAt(modX, modY) {
         const moduleRight = state.ship.getModule(modX + 1, modY);
-        return moduleRight && moduleRight.solid;
+        return moduleRight && moduleRight.solid && moduleRight.constructor !== SupportModule;
     }
 
     getStats() {
@@ -965,9 +965,9 @@ SmokeStackModule.solid = false;
 class SupportModule extends ShipModule {
     static canBuildAt(modX, modY) {
         const left = state.ship.getModule(modX - 1, modY);
-        if (left && left.solid) return true;
+        if (left && left.solid && left.constructor !== SupportModule) return true;
         const right = state.ship.getModule(modX + 1, modY);
-        return right && right.solid;
+        return right && right.solid && right.constructor !== SupportModule;
     }
 
     constructor(ship, x, y) {
