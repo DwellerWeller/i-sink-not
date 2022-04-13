@@ -783,14 +783,6 @@ class BoilerModule extends ShipModule {
         }
 
         super.tick(timeSinceLastTick, now);
-        
-        if (this.hasSmokeStack === null) {
-            const moduleAbove = state.ship.getModule(this.x, this.y + 1);
-            const moduleAboveType = moduleAbove && moduleAbove.constructor.name;
-            if (moduleAboveType != 'NullModule' && moduleAboveType != 'ConstructionModule') {
-                this.hasSmokeStack = moduleAbove.constructor.name == 'SmokeStackModule';
-            }
-        }
 
         if (this.isGeneratingSteam && !this.hasSmokeStack && Math.random() < timeSinceLastTick / 200) {
             emitParticle(this.emissionsClass, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT));
@@ -817,6 +809,17 @@ class BoilerModule extends ShipModule {
             BoilerModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
             BoilerModule.windowSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + bob);
         }
+    }
+
+    updateDisplay() {
+        const ship = state.ship;
+        const { x, y } = this;
+
+        this.hasSmokeStack = !!(
+            ship.getModule(x, y + 1, SmokeStackModule) ||
+            ship.getModule(x - 1, y, SmokeStackModule) ||
+            ship.getModule(x + 1, y, SmokeStackModule)
+        );
     }
 }
 BoilerModule.sprite = spriteController.sprites.boiler;
@@ -938,13 +941,32 @@ CastleModule.description = 'Reinforces adjacent hulls (and looks really cool)';
 
 class SmokeStackModule extends ShipModule {    
     static canBuildAt(modX, modY) {
-        const mod = state.ship.getModule(modX, modY - 1, BoilerModule);
-        return mod && mod.solid;
+        const ship = state.ship;
+
+        const below = ship.getSolidModule(modX, modY - 1);
+
+        if (!below) return false;
+
+        if (below instanceof BoilerModule) return true;
+
+        return !!(
+            ship.getModule(modX - 1, modY, BoilerModule) ||
+            ship.getModule(modX + 1, modY, BoilerModule)
+        );
     }
     
     constructor(ship, x, y) {
         super(ship, x, y);
-        this.boiler = ship.getModule(x, y-1);
+        this.boilers = [];
+
+        const below = ship.getModule(x, y - 1, BoilerModule);
+        if (below) this.boilers.push(below);
+
+        const left = ship.getModule(x - 1, y, BoilerModule);
+        if (left) this.boilers.push(left);
+
+        const right = ship.getModule(x + 1, y, BoilerModule);
+        if (right) this.boilers.push(right);
     }
 
     get weight() { return 8; }
@@ -952,8 +974,10 @@ class SmokeStackModule extends ShipModule {
     tick(timeSinceLastTick) {
         super.tick();
 
-        if (this.boiler && this.boiler.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
-            emitParticle(this.boiler.emissionsClass, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+        for (let boiler of this.boilers) {
+            if (boiler.isGeneratingSteam && Math.random() < timeSinceLastTick / 200) {
+                emitParticle(boiler.emissionsClass, 1000, this.globalX + 30, this.globalY - (SHIP_MODULE_HEIGHT * 2));
+            }
         }
     }
 }
@@ -1152,6 +1176,11 @@ class Ship extends Entity {
             }
         }
         return moduleCount;
+    }
+
+    getSolidModule(x, y, ModuleClass = undefined) {
+        const mod = this.getModule(x, y, ModuleClass);
+        return mod && mod.solid && mod;
     }
 
     getModule(x, y, ModuleClass = undefined) {
