@@ -877,13 +877,15 @@ PropellerModule.blurSprites = [
 ];
 
 class BalloonModule extends ShipModule {
-    get isInflated() {
-        const moduleBelow = this.ship.getModule(this.x, this.y - 1);
-        return moduleBelow.isGeneratingSteam;
+    inflation = 0;
+    isInflating = false;
+
+    get inflationPercent() {
+        return this.inflation / 100;
     }
 
     get weight() {
-        return this.isInflated ? -10 : 1;
+        return 1 - (this.inflationPercent * 11);
     }
 
     static canBuildAt(modX, modY) {
@@ -891,12 +893,24 @@ class BalloonModule extends ShipModule {
         return moduleBelow && moduleBelow.constructor.name == 'BoilerModule';
     }
 
+    tick() {
+        const below = this.ship.getModule(this.x, this.y - 1, BoilerModule);
+        this.isInflating = below && below.isGeneratingSteam;
+
+        if (this.isInflating) {
+            this.inflation = Math.min(100, this.inflation + 5);
+        } else {
+            this.inflation = Math.max(0, this.inflation - 2);
+        }
+    }
+
     render() {
         BalloonModule.baseSprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT);
     }
     
     renderLate() {
-        const inflationOffset = this.isInflated ? getWaterBob(0, 3, 400) : 48;
+        let inflationOffset = (1 - this.inflationPercent) * 48;
+        if (this.isInflating) inflationOffset += getWaterBob(0, 3, 400);
         BalloonModule.sprite.draw(ctx, 0, -SHIP_MODULE_HEIGHT + inflationOffset);
     }
 }
